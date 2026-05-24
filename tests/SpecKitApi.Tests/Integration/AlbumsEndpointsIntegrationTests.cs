@@ -21,18 +21,22 @@ public sealed class AlbumsEndpointsIntegrationTests : IClassFixture<WebApplicati
         var stub = new StubJsonPlaceholderClient();
         configure?.Invoke(stub);
 
-        return _factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
+        return _factory
+            .WithWebHostBuilder(builder =>
             {
-                // Remove real IJsonPlaceholderClient registration
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IJsonPlaceholderClient));
-                if (descriptor is not null)
-                    services.Remove(descriptor);
+                builder.ConfigureServices(services =>
+                {
+                    // Remove real IJsonPlaceholderClient registration
+                    var descriptor = services.SingleOrDefault(d =>
+                        d.ServiceType == typeof(IJsonPlaceholderClient)
+                    );
+                    if (descriptor is not null)
+                        services.Remove(descriptor);
 
-                services.AddSingleton<IJsonPlaceholderClient>(stub);
-            });
-        }).CreateClient();
+                    services.AddSingleton<IJsonPlaceholderClient>(stub);
+                });
+            })
+            .CreateClient();
     }
 
     [Fact]
