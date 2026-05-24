@@ -4,7 +4,7 @@
 
 **Created**: 2025-07-18
 
-**Status**: Draft
+**Status**: Complete
 
 **Input**: User description: "Build a .NET 10 Web API coding test solution that integrates with JSONPlaceholder. For this first feature (001), focus only on: the typed HTTP client for JSONPlaceholder, the DTOs representing albums and photos, and the service layer that fetches, combines, and filters the data. No API endpoints yet — just the core logic and its tests."
 
@@ -91,7 +91,7 @@ The system represents albums and photos as clearly defined data structures. An a
 
 - **SC-001**: All albums returned by the service contain only their correct associated photos — zero photos appear under an incorrect album in any result.
 - **SC-002**: Filtering by a known user ID returns exclusively that user's albums and photos — no data from other users appears in a filtered result.
-- **SC-003**: All unit tests pass on a clean checkout without any manual configuration or dependency installation steps beyond what the standard toolchain provides.
+- **SC-003**: All unit tests pass on a clean checkout without any manual configuration or dependency installation steps beyond what the standard toolchain provides. *(See FR-008 for the corresponding functional requirement.)*
 - **SC-004**: The data-fetch layer and service layer are independently testable — unit tests for the service layer do not require a live external connection and run in under 5 seconds total.
 - **SC-005**: The data structures fully represent all fields available from the external source for albums and photos, with no data loss during mapping.
 
@@ -105,3 +105,6 @@ The system represents albums and photos as clearly defined data structures. An a
 - Unit tests will use test doubles (stubs/mocks) to simulate the external HTTP client — no live network calls are made during test execution.
 - This feature delivers only the core data layer; no HTTP API endpoints, controllers, or routing are in scope for feature 001.
 - A README documenting how to run the project and providing a curl example is in scope for the overall solution but will be completed when API endpoints are added in a subsequent feature.
+- Duplicate album or photo records returned by the external source are out of scope; behaviour for duplicates is undefined and no deduplication logic will be added.
+- Photos that reference a non-existent album ID (orphaned photos) are silently excluded from all results during the grouping step.
+- Malformed or partial JSON from the external source propagates as a deserialization exception to the caller; no partial-result recovery is attempted.

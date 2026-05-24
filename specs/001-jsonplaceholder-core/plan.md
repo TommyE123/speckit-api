@@ -88,10 +88,14 @@ src/
     ├── DTOs/
     │   ├── AlbumDto.cs                 # External API shape for /albums
     │   └── PhotoDto.cs                 # External API shape for /photos
+    ├── Extensions/
+    │   └── ServiceCollectionExtensions.cs  # DI registration helper
     ├── Models/
     │   ├── Album.cs                    # Internal domain model
     │   ├── Photo.cs                    # Internal domain model
     │   └── AlbumWithPhotos.cs          # Combined service output type
+    ├── Options/
+    │   └── JsonPlaceholderOptions.cs   # Typed config POCO bound to appsettings
     └── Services/
         ├── IAlbumService.cs            # Interface: GetAlbumsWithPhotosAsync / ByUserAsync
         └── AlbumService.cs             # Implementation: fetch, map, combine, filter

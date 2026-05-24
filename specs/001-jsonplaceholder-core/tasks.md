@@ -10,6 +10,8 @@ description: "Task list for JSONPlaceholder Core Data Layer"
 
 **Prerequisites**: plan.md ✅, spec.md ✅, research.md ✅, data-model.md ✅, quickstart.md ✅
 
+**Phase Map**: Phase 1 = Setup | Phase 2 = Foundation (types/interfaces) | Phase 3 = US3 (DTO/model validation) | Phase 4 = US1 (fetch + combine) | Phase 5 = US2 (user filter) | Phase 6 = DI registration | Phase 7 = Polish
+
 **Tests**: Test tasks are MANDATORY per Principle III (Test-First, NON-NEGOTIABLE). Tests MUST be written and confirmed failing before implementation begins (Red-Green-Refactor). Do not skip or defer test tasks.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
@@ -30,7 +32,7 @@ description: "Task list for JSONPlaceholder Core Data Layer"
 - [x] T002 Create source project `src/SpecKitApi/SpecKitApi.csproj` targeting `net10.0` and add NuGet packages: `Microsoft.Extensions.Http`, `Microsoft.Extensions.Http.Polly` via `dotnet add package`
 - [x] T003 Create test project `tests/SpecKitApi.Tests/SpecKitApi.Tests.csproj` targeting `net10.0` and add NuGet packages: `xunit`, `xunit.runner.visualstudio`, `Microsoft.NET.Test.Sdk`, `Moq`, `coverlet.collector` via `dotnet add package`
 - [x] T004 Add `tests/SpecKitApi.Tests` → `src/SpecKitApi` project reference and add both projects to `SpecKitApi.sln`
-- [x] T005 [P] Create `src/SpecKitApi/appsettings.json` with `JsonPlaceholderOptions:BaseUrl` set to `https://jsonplaceholder.typicode.com`
+- [x] T005 [P] Create `src/SpecKitApi/appsettings.json` with a `"JsonPlaceholderOptions"` section containing `"BaseUrl": "https://jsonplaceholder.typicode.com"` (nested object, not colon-delimited path)
 - [x] T006 [P] Create `src/SpecKitApi/Options/JsonPlaceholderOptions.cs` — sealed POCO with `SectionName` constant and `BaseUrl` string property
 
 **Checkpoint**: `dotnet build` succeeds with zero warnings and zero errors on the empty project.
@@ -43,15 +45,15 @@ description: "Task list for JSONPlaceholder Core Data Layer"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [x] T007 [P] Create `src/SpecKitApi/DTOs/AlbumDto.cs` — sealed record/class with `[JsonPropertyName]` attributes: `Id` (int), `UserId` (int), `Title` (string) per data-model.md
-- [x] T008 [P] Create `src/SpecKitApi/DTOs/PhotoDto.cs` — sealed record/class with `[JsonPropertyName]` attributes: `Id`, `AlbumId`, `Title`, `Url`, `ThumbnailUrl` (all `[JsonPropertyName]` annotated) per data-model.md
+- [x] T007 [P] Create `src/SpecKitApi/DTOs/AlbumDto.cs` — **stub only**: sealed record/class with properties `Id` (int), `UserId` (int), `Title` (string) — **no `[JsonPropertyName]` attributes**; attributes are added in T017 to preserve the Red phase for T014–T015
+- [x] T008 [P] Create `src/SpecKitApi/DTOs/PhotoDto.cs` — **stub only**: sealed record/class with properties `Id` (int), `AlbumId` (int), `Title` (string), `Url` (string), `ThumbnailUrl` (string) — **no `[JsonPropertyName]` attributes**; attributes are added in T017 to preserve the Red phase for T014–T015
 - [x] T009 [P] Create `src/SpecKitApi/Models/Album.cs` — sealed record/class: `Id` (int), `UserId` (int), `Title` (string) per data-model.md
 - [x] T010 [P] Create `src/SpecKitApi/Models/Photo.cs` — sealed record/class: `Id` (int), `AlbumId` (int), `Title` (string), `ImageUrl` (string), `ThumbnailUrl` (string) per data-model.md
 - [x] T011 [P] Create `src/SpecKitApi/Models/AlbumWithPhotos.cs` — sealed record/class: `Album` (Album), `Photos` (IReadOnlyList<Photo>) per data-model.md
 - [x] T012 [P] Create `src/SpecKitApi/Clients/IJsonPlaceholderClient.cs` — interface with `GetAlbumsAsync(CancellationToken)` → `Task<IReadOnlyList<AlbumDto>>` and `GetPhotosAsync(CancellationToken)` → `Task<IReadOnlyList<PhotoDto>>`
 - [x] T013 [P] Create `src/SpecKitApi/Services/IAlbumService.cs` — interface with `GetAlbumsWithPhotosAsync(CancellationToken)` → `Task<IReadOnlyList<AlbumWithPhotos>>` and `GetAlbumsWithPhotosByUserAsync(int userId, CancellationToken)` → `Task<IReadOnlyList<AlbumWithPhotos>>`
 
-**Checkpoint**: Foundation ready — `dotnet build` succeeds. All types and interfaces exist. User story implementation can now begin.
+**Checkpoint**: Foundation ready — `dotnet build` succeeds. All types and interfaces exist. **DTOs are stubs with no `[JsonPropertyName]` attributes** — this is intentional. User story implementation can now begin.
 
 ---
 
@@ -67,13 +69,15 @@ description: "Task list for JSONPlaceholder Core Data Layer"
 
 > **Write these tests FIRST. Confirm they FAIL before writing any implementation.**
 
+> **⚠️ Red-Phase Gate (Constitution III)**: `AlbumDto` and `PhotoDto` stubs from Phase 2 have **no** `[JsonPropertyName]` attributes. Write T014 and T015 and run `dotnet test` — deserialization will return default values (0 / null) for all fields because `System.Text.Json` is case-sensitive by default. T014 and T015 **MUST fail** at this point. **Do not proceed to T017 until you have confirmed failing tests.**
+
 - [x] T014 [P] [US3] Write DTO deserialization tests in `tests/SpecKitApi.Tests/DTOs/AlbumDtoTests.cs` — assert `AlbumDto` deserialises `{ "id":1, "userId":2, "title":"t" }` to correct field values
 - [x] T015 [P] [US3] Write DTO deserialization tests in `tests/SpecKitApi.Tests/DTOs/PhotoDtoTests.cs` — assert `PhotoDto` deserialises all five fields including `thumbnailUrl` → `ThumbnailUrl` and `url` → `Url`
 - [x] T016 [P] [US3] Write domain model structural tests in `tests/SpecKitApi.Tests/Models/AlbumWithPhotosTests.cs` — assert `AlbumWithPhotos` invariant: every `Photo` in `Photos` shares `AlbumId` with parent `Album.Id`
 
 ### Implementation for User Story 3
 
-- [x] T017 [US3] Verify `AlbumDto` and `PhotoDto` fields compile and JSON attributes are correct in `src/SpecKitApi/DTOs/` (update from T007/T008 stubs if needed)
+- [x] T017 [US3] Add `[JsonPropertyName]` attributes to `AlbumDto.cs` and `PhotoDto.cs` in `src/SpecKitApi/DTOs/` per data-model.md: `"id"`→`Id`, `"userId"`→`UserId`, `"albumId"`→`AlbumId`, `"title"`→`Title`, `"url"`→`Url`, `"thumbnailUrl"`→`ThumbnailUrl` — this is the Green step that makes T014–T015 pass
 - [x] T018 [US3] Verify `Album`, `Photo`, `AlbumWithPhotos` constructors/properties are complete in `src/SpecKitApi/Models/` (update from T009/T010/T011 stubs if needed)
 
 **Checkpoint**: T014–T016 all pass. Data shape contract is verified. US3 acceptance scenarios satisfied.
@@ -136,7 +140,7 @@ description: "Task list for JSONPlaceholder Core Data Layer"
 
 **Purpose**: Code quality, documentation, and final validation.
 
-- [x] T026 [P] Add `/// <summary>` XML doc comments to all public interfaces (`IJsonPlaceholderClient`, `IAlbumService`) and their methods in `src/SpecKitApi/Clients/` and `src/SpecKitApi/Services/`
+- [x] T026 [P] Add `/// <summary>` XML doc comments to all public interfaces (`IJsonPlaceholderClient`, `IAlbumService`) and their methods in `src/SpecKitApi/Clients/` and `src/SpecKitApi/Services/`; also add XML doc comments to the implementation classes `JsonPlaceholderClient.cs` and `AlbumService.cs`
 - [x] T027 [P] Add XML doc comments to all domain model and DTO types in `src/SpecKitApi/Models/` and `src/SpecKitApi/DTOs/`
 - [x] T028 Enable `<GenerateDocumentationFile>true</GenerateDocumentationFile>` and `<Nullable>enable</Nullable>` in `src/SpecKitApi/SpecKitApi.csproj`; fix any nullable warnings introduced
 - [x] T029 Enable `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` in `src/SpecKitApi/SpecKitApi.csproj`; resolve all warnings to achieve clean build
