@@ -20,7 +20,8 @@ public class MockHttpMessageHandler : DelegatingHandler
 
     protected override Task<HttpResponseMessage> SendAsync(
         HttpRequestMessage request,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         LastRequest = request;
         return Task.FromResult(_handler(request));
@@ -29,12 +30,14 @@ public class MockHttpMessageHandler : DelegatingHandler
 
 public class JsonPlaceholderClientTests
 {
-    private static HttpClient CreateHttpClient(Func<HttpRequestMessage, HttpResponseMessage> handler)
+    private static HttpClient CreateHttpClient(
+        Func<HttpRequestMessage, HttpResponseMessage> handler
+    )
     {
         var mockHandler = new MockHttpMessageHandler(handler);
         var httpClient = new HttpClient(mockHandler)
         {
-            BaseAddress = new Uri("https://jsonplaceholder.typicode.com")
+            BaseAddress = new Uri("https://jsonplaceholder.typicode.com"),
         };
         return httpClient;
     }
@@ -44,14 +47,22 @@ public class JsonPlaceholderClientTests
         var json = JsonSerializer.Serialize(body);
         return new HttpResponseMessage(HttpStatusCode.OK)
         {
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
+            Content = new StringContent(json, Encoding.UTF8, "application/json"),
         };
     }
 
     [Fact]
     public async Task GetAlbumsAsync_ReturnsDeserializedAlbums()
     {
-        var albums = new[] { new { id = 1, userId = 2, title = "Test Album" } };
+        var albums = new[]
+        {
+            new
+            {
+                id = 1,
+                userId = 2,
+                title = "Test Album",
+            },
+        };
         var httpClient = CreateHttpClient(_ => JsonResponse(albums));
         var client = new JsonPlaceholderClient(httpClient);
 
@@ -85,7 +96,14 @@ public class JsonPlaceholderClientTests
     {
         var photos = new[]
         {
-            new { id = 1, albumId = 1, title = "Photo 1", url = "https://example.com/1.jpg", thumbnailUrl = "https://example.com/t1.jpg" }
+            new
+            {
+                id = 1,
+                albumId = 1,
+                title = "Photo 1",
+                url = "https://example.com/1.jpg",
+                thumbnailUrl = "https://example.com/t1.jpg",
+            },
         };
         var httpClient = CreateHttpClient(_ => JsonResponse(photos));
         var client = new JsonPlaceholderClient(httpClient);
@@ -131,7 +149,9 @@ public class JsonPlaceholderClientTests
     [Fact]
     public async Task GetAlbumsAsync_ThrowsHttpRequestException_OnServerError()
     {
-        var httpClient = CreateHttpClient(_ => new HttpResponseMessage(HttpStatusCode.InternalServerError));
+        var httpClient = CreateHttpClient(_ => new HttpResponseMessage(
+            HttpStatusCode.InternalServerError
+        ));
         var client = new JsonPlaceholderClient(httpClient);
 
         await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAlbumsAsync());

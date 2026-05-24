@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Diagnostics;
 using System.Text.Json;
+using Microsoft.AspNetCore.Diagnostics;
 using SpecKitApi.Endpoints;
 using SpecKitApi.Extensions;
 using SpecKitApi.Middleware;
@@ -26,11 +26,17 @@ app.UseExceptionHandler(exceptionApp =>
         var correlationId = ctx.Items["CorrelationId"]?.ToString() ?? ctx.TraceIdentifier;
         ctx.Response.StatusCode = 500;
         ctx.Response.ContentType = "application/json";
-        var error = new ErrorResponse("An unexpected error occurred.", "INTERNAL_ERROR", correlationId);
-        await ctx.Response.WriteAsync(JsonSerializer.Serialize(error, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        }));
+        var error = new ErrorResponse(
+            "An unexpected error occurred.",
+            "INTERNAL_ERROR",
+            correlationId
+        );
+        await ctx.Response.WriteAsync(
+            JsonSerializer.Serialize(
+                error,
+                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+            )
+        );
     });
 });
 

@@ -20,14 +20,18 @@ public static class ServiceCollectionExtensions
     /// <returns>The modified service collection.</returns>
     public static IServiceCollection AddJsonPlaceholderServices(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration
+    )
     {
         services.Configure<JsonPlaceholderOptions>(
-            configuration.GetSection(JsonPlaceholderOptions.SectionName));
+            configuration.GetSection(JsonPlaceholderOptions.SectionName)
+        );
 
-        var options = configuration
-            .GetSection(JsonPlaceholderOptions.SectionName)
-            .Get<JsonPlaceholderOptions>() ?? new JsonPlaceholderOptions();
+        var options =
+            configuration
+                .GetSection(JsonPlaceholderOptions.SectionName)
+                .Get<JsonPlaceholderOptions>()
+            ?? new JsonPlaceholderOptions();
 
         services
             .AddHttpClient<IJsonPlaceholderClient, JsonPlaceholderClient>(client =>
