@@ -15,19 +15,43 @@ Navigate to the root directory.
 
 Build the solution:
 
-Bash
+```bash
 dotnet build
+```
+
 Run the API:
 
-Bash
-dotnet run --project WebApiChallenge.Api
-The API will be available at http://localhost:5000 (or as configured in launchSettings.json).
+```bash
+dotnet run --project src/SpecKitApi
+```
 
-API Usage
-Filter by User ID:
+The API will be available at http://localhost:5000.
 
-Bash
-curl -X GET "http://localhost:5000/api/data?userId=1" -H "accept: application/json"
+API Endpoints
+
+```bash
+# Health check — returns HTTP 200
+curl http://localhost:5000/health
+
+# All albums with their photos
+curl http://localhost:5000/albums
+
+# Albums filtered by user ID
+curl "http://localhost:5000/albums?userId=1"
+```
+
+Response shape for `/albums`:
+
+```json
+[
+  {
+    "album": { "id": 1, "userId": 1, "title": "Album title" },
+    "photos": [
+      { "id": 1, "albumId": 1, "title": "Photo title", "imageUrl": "...", "thumbnailUrl": "..." }
+    ]
+  }
+]
+```
 Technical Decisions
 Architecture: Implemented a clean separation of concerns using a Class Library (Core) for domain logic and an Api project for infrastructure/controllers.
 

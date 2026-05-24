@@ -53,6 +53,8 @@ app.MapAlbums()
 app.MapGet("/health", ...)
 ```
 
+> **Addendum — plan update**: `CorrelationIdMiddleware` must additionally store the resolved correlation ID in `HttpContext.Items["CorrelationId"]` so that endpoint handlers and the global exception handler can embed it in `ErrorResponse.CorrelationId` (required by FR-006, SC-008). The `BeginScope` enrichment for logging and the `HttpContext.Items` storage for error responses are complementary and both required.
+
 **Alternatives considered**:
 
 | Alternative | Rejected because |
@@ -82,6 +84,8 @@ app.MapGet("/health", ...)
 | `MapGet("/error", ...)` route | Registers a discoverable endpoint that callers could invoke directly; also requires `app.UseStatusCodePages` for 404/405 handling |
 | `ProblemDetails` middleware (`AddProblemDetails` + `UseStatusCodePages`) | Returns RFC 7807 Problem Details shape which differs from the spec's `ErrorResponse { Message }` contract; swapping to the spec shape requires overriding the factory anyway |
 | `try/catch` in every endpoint handler | Duplicates error-handling logic; a middleware is the idiomatic single place for unhandled exception policy |
+
+> **Correction — plan update**: The initial research answer for Q3 showed `ErrorResponse("An unexpected error occurred.")` with only a `message` field. This was incorrect: the spec (FR-006, SC-004, SC-008, Key Entities) explicitly requires three fields — `message`, `code`, and `correlationId`. The corrected constructor call is `new ErrorResponse("An unexpected error occurred.", "INTERNAL_ERROR", correlationId)` where `correlationId` is read from `HttpContext.Items["CorrelationId"]`. Correspondingly, the 400 handler calls `new ErrorResponse("userId must be a positive integer.", "INVALID_PARAMETER", correlationId)`. See `data-model.md` for the full updated `ErrorResponse` definition and code value table.
 
 ---
 

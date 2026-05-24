@@ -8,6 +8,16 @@
 
 **Input**: User description: "Build the API endpoints for the JSONPlaceholder Web API. Wire up the existing AlbumService and JsonPlaceholderClient (built in 001) into Minimal API endpoints in a .NET 10 ASP.NET Core application."
 
+## Clarifications
+
+### Session 2026-05-24
+
+- Q: Should `/albums` require authentication? → A: No authentication is required for `/albums` or `/health`; both endpoints are publicly accessible.
+- Q: Which error response schema should be used? → A: Use a standard JSON error body with `message`, `code`, and `correlationId` for all API error responses.
+- Q: Should `GET /albums` support pagination in this feature? → A: No pagination in this feature; `GET /albums` returns the full result set (optionally filtered by `userId`).
+- Q: How should correlation IDs be handled from incoming requests? → A: Use incoming `X-Correlation-ID` when valid; otherwise generate a new correlation ID.
+- Q: Should `GET /health` verify external dependencies? → A: No; `GET /health` is liveness-only and does not call external dependencies.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Retrieve All Albums with Photos (Priority: P1)
@@ -68,8 +78,8 @@ A client developer receiving an error from the API can parse a consistent, struc
 
 **Acceptance Scenarios**:
 
-1. **Given** a request with an invalid `userId` parameter, **When** the API returns a 400 response, **Then** the body is a JSON object containing at least an error message field; no stack trace or raw exception text is present.
-2. **Given** an internal failure occurs during request processing, **When** the API returns a 500 response, **Then** the body is a JSON object containing a safe, generic error message; no internal detail is exposed.
+1. **Given** a request with an invalid `userId` parameter, **When** the API returns a 400 response, **Then** the body is a JSON object containing `message`, `code`, and `correlationId`; no stack trace or raw exception text is present.
+2. **Given** an internal failure occurs during request processing, **When** the API returns a 500 response, **Then** the body is a JSON object containing a safe, generic `message`, a stable `code`, and `correlationId`; no internal detail is exposed.
 
 ---
 
@@ -105,20 +115,24 @@ A developer or support engineer investigating an issue can trace a specific API 
 - **FR-003**: The `GET /albums` endpoint MUST return HTTP 400 when `userId` is provided but is not a valid positive integer.
 - **FR-004**: The `GET /albums` endpoint MUST return HTTP 500 with a structured JSON error body when an internal or external failure prevents the request from completing.
 - **FR-005**: The system MUST expose a `GET /health` endpoint that returns HTTP 200 when the API is running.
-- **FR-006**: All error responses MUST use a consistent structured JSON format and MUST NOT expose raw exception messages, stack traces, or internal system details.
+- **FR-006**: All error responses MUST use a consistent structured JSON format with `message`, `code`, and `correlationId` fields and MUST NOT expose raw exception messages, stack traces, or internal system details.
 - **FR-007**: The system MUST emit structured log entries for every request, including a correlation ID that is consistent across all log entries for the same request.
 - **FR-008**: The system MUST register all services using the existing `ServiceCollectionExtensions` and MUST NOT duplicate or bypass existing registration logic.
 - **FR-009**: All API endpoints MUST use the Minimal API pattern — no MVC controllers may be introduced.
 - **FR-010**: All configuration values (such as the external data source base URL) MUST be read from `appsettings.json`; no values may be hardcoded in application code.
 - **FR-011**: All 31 existing unit tests MUST continue to pass after the API endpoint layer is added.
 - **FR-012**: The system MUST include integration tests covering at least: successful retrieval of all albums, successful filtered retrieval by user ID, and the 400 response for an invalid `userId`.
+- **FR-013**: The `GET /albums` and `GET /health` endpoints MUST be publicly accessible and MUST NOT require authentication.
+- **FR-014**: The `GET /albums` endpoint MUST NOT implement pagination in this feature and MUST return the full result set (optionally filtered by `userId`).
+- **FR-015**: For each request, the system MUST use a valid incoming `X-Correlation-ID` header value when provided; if missing or invalid, it MUST generate a new correlation ID and use it consistently for logs and error responses.
+- **FR-016**: The `GET /health` endpoint MUST be liveness-only and MUST NOT perform outbound dependency checks.
 
 ### Key Entities
 
 - **Album**: A named collection of photos owned by a user. Carries a unique album ID, an owning user ID, and a title. Defined by the existing data layer from feature 001.
 - **Photo**: A single image belonging to an album. Carries a unique photo ID, a parent album ID, a title, a full-size image location, and a thumbnail location. Defined by the existing data layer from feature 001.
 - **AlbumWithPhotos**: The combined view pairing an Album with its associated Photos collection. This is the primary response payload returned by `GET /albums`.
-- **ErrorResponse**: A structured JSON object returned on error responses. Contains at minimum a human-readable message field. No implementation details or raw exceptions are included.
+- **ErrorResponse**: A structured JSON object returned on error responses. Contains `message` (human-readable), `code` (stable machine-readable error code), and `correlationId` (request trace identifier). No implementation details or raw exceptions are included.
 
 ## Success Criteria *(mandatory)*
 
@@ -127,10 +141,12 @@ A developer or support engineer investigating an issue can trace a specific API 
 - **SC-001**: `dotnet run` starts the API without errors, and `GET /health` returns 200 within 5 seconds of startup.
 - **SC-002**: `GET /albums` returns a JSON array containing albums with their associated photos; verified by integration test on every build.
 - **SC-003**: `GET /albums?userId=1` returns only albums belonging to user 1; all other users' albums are absent from the response.
-- **SC-004**: `GET /albums?userId=abc` returns HTTP 400 with a structured JSON error body containing no raw exception text.
+- **SC-004**: `GET /albums?userId=abc` returns HTTP 400 with a structured JSON error body containing `message`, `code`, and `correlationId`, with no raw exception text.
 - **SC-005**: All 31 pre-existing unit tests and all new integration tests pass on a clean checkout without manual configuration.
 - **SC-006**: Every log entry produced during a request includes a correlation ID field that matches across all entries for that request.
 - **SC-007**: No error response body contains a stack trace, exception type name, or internal file path.
+- **SC-008**: For requests with a valid `X-Correlation-ID` header, that same value appears in all request logs and in any error response `correlationId`; otherwise, a generated correlation ID appears consistently.
+- **SC-009**: `GET /health` returns HTTP 200 even when the external JSONPlaceholder service is unavailable, provided the API process is running.
 
 ## Assumptions
 

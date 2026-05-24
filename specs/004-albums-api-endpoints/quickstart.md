@@ -111,7 +111,7 @@ Expected:
 HTTP/1.1 400 Bad Request
 Content-Type: application/json; charset=utf-8
 
-{"message":"userId must be a positive integer."}
+{"message":"userId must be a positive integer.","code":"INVALID_PARAMETER","correlationId":"<generated-id>"}
 ```
 
 ---

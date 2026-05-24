@@ -122,7 +122,9 @@ X-Correlation-ID: {correlationId}
 
 ```json
 {
-  "message": "userId must be a positive integer."
+  "message": "userId must be a positive integer.",
+  "code": "INVALID_PARAMETER",
+  "correlationId": "{correlationId}"
 }
 ```
 
@@ -138,7 +140,9 @@ X-Correlation-ID: {correlationId}
 
 ```json
 {
-  "message": "An unexpected error occurred."
+  "message": "An unexpected error occurred.",
+  "code": "INTERNAL_ERROR",
+  "correlationId": "{correlationId}"
 }
 ```
 
@@ -161,13 +165,24 @@ All non-2xx responses return the same `ErrorResponse` shape:
 
 ```json
 {
-  "message": "string — human-readable description; no internal details"
+  "message": "string — human-readable description; no internal details",
+  "code": "string — stable machine-readable error code",
+  "correlationId": "string — request trace identifier"
 }
 ```
 
 | Field | Type | Always present | Notes |
 |---|---|---|---|
 | `message` | `string` | Yes | Safe, generic description of what went wrong |
+| `code` | `string` | Yes | Stable machine-readable code for programmatic error handling |
+| `correlationId` | `string` | Yes | Echoes the correlation ID for the request (from `X-Correlation-ID` header or generated) |
+
+**Error Code Values**:
+
+| Code | HTTP Status | Trigger |
+|---|---|---|
+| `INVALID_PARAMETER` | 400 | `userId` is present but cannot be parsed as a positive integer |
+| `INTERNAL_ERROR` | 500 | Unhandled exception from the service or client layer |
 
 ---
 

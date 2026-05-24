@@ -16,6 +16,7 @@ Wire the existing `AlbumService` and `JsonPlaceholderClient` (built in feature 0
 | SDK change required | `SpecKitApi.csproj` must change from `Microsoft.NET.Sdk` → `Microsoft.NET.Sdk.Web` to activate the web host |
 | Existing services | `IAlbumService` / `AlbumService`, `IJsonPlaceholderClient` / `JsonPlaceholderClient`, `ServiceCollectionExtensions.AddJsonPlaceholderServices` — **no modification required** |
 | Serialization | `System.Text.Json` only (constitution-mandated; Newtonsoft.Json prohibited) |
+| `ErrorResponse` shape | Three fields required by spec (FR-006, SC-004, SC-008): `message` (human-readable), `code` (stable machine-readable value — `"INVALID_PARAMETER"` or `"INTERNAL_ERROR"`), `correlationId` (request trace ID echoed from middleware) |
 | Testing — unit | xUnit v3 + Moq; 31 existing tests in `tests/SpecKitApi.Tests/` — must not regress |
 | Testing — integration | `Microsoft.AspNetCore.Mvc.Testing` added to existing `SpecKitApi.Tests` project; `WebApplicationFactory<Program>` with `ConfigureTestServices` for stubbing `IJsonPlaceholderClient` |
 | Configuration | `appsettings.json` → `JsonPlaceholderOptions:BaseUrl` already present; no new config values needed |
@@ -86,11 +87,12 @@ src/SpecKitApi/
 │   └── ServiceCollectionExtensions.cs  # existing — no change
 ├── Middleware/
 │   └── CorrelationIdMiddleware.cs      # NEW — reads X-Correlation-ID / TraceIdentifier,
-│                                       #       sets response header, scopes ILogger
+│                                       #       sets response header, stores in HttpContext.Items["CorrelationId"],
+│                                       #       and scopes ILogger
 ├── Models/
 │   ├── Album.cs                        # existing — no change
 │   ├── AlbumWithPhotos.cs              # existing — no change
-│   ├── ErrorResponse.cs                # NEW — structured error record { Message }
+│   ├── ErrorResponse.cs                # NEW — structured error record { Message, Code, CorrelationId }
 │   └── Photo.cs                        # existing — no change
 ├── Options/
 │   └── JsonPlaceholderOptions.cs       # existing — no change
@@ -127,5 +129,6 @@ No Constitution Check violations. The following non-obvious design decisions are
 |---|---|---|
 | `string?` for `userId` query param (not `int?`) | Lets the handler — not the framework binder — own the 400 response shape, guaranteeing consistent `ErrorResponse` JSON for `userId=abc`, `userId=0`, and `userId=1.5` (FR-003, FR-006) | `int?` binding lets ASP.NET Core return its own 400 body before the handler runs; overriding that body requires `IActionResultExecutor` hooks that add more complexity than switching to `string?` |
 | `CorrelationIdMiddleware` (custom, no SDK) | No external dependency; `ILogger.BeginScope` enriches every log entry within the request pipeline natively | OpenTelemetry or Serilog would add a third-party dependency and exceed the spec's observability scope (FR-007 requires correlation ID on logs only) |
+| `HttpContext.Items["CorrelationId"]` for error body | Allows both endpoint handlers and the global exception handler to embed the resolved correlation ID in `ErrorResponse.CorrelationId` (FR-006, SC-008) without an extra scoped service or `IHttpContextAccessor` | `IHttpContextAccessor` injection adds service registration overhead; a scoped `CorrelationContext` class adds an unnecessary abstraction — `HttpContext.Items` is the idiomatic in-request key-value store |
 | Response DTOs (`AlbumResponse`, `PhotoResponse`, `AlbumWithPhotosResponse`) | Constitution Principle I mandates DTOs at API boundaries; prevents internal domain record changes from silently breaking the API contract | Returning domain models directly would couple the API wire format to the internal model; mapping code is three trivial `Select` projections |
 | `UseExceptionHandler` lambda (not `/error` route) | Self-contained; no extra route registered in the endpoint table | `MapGet("/error", ...)` approach adds a discoverable route that callers could accidentally invoke directly |

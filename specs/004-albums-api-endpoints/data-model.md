@@ -103,19 +103,32 @@ var response = results.Select(awp => new AlbumWithPhotosResponse(
 ### `ErrorResponse`
 ```csharp
 // src/SpecKitApi/Models/ErrorResponse.cs
-public sealed record ErrorResponse(string Message);
+public sealed record ErrorResponse(string Message, string Code, string CorrelationId);
 ```
 
 | JSON key | Type | Notes |
 |---|---|---|
 | `message` | `string` | Human-readable; MUST NOT contain stack trace, exception type, or internal path |
+| `code` | `string` | Stable machine-readable error code (see Code Values table below) |
+| `correlationId` | `string` | Request trace ID; sourced from `HttpContext.Items["CorrelationId"]` set by `CorrelationIdMiddleware` (FR-015, SC-008) |
+
+**Code Values**:
+
+| Value | HTTP status | Trigger |
+|---|---|---|
+| `"INVALID_PARAMETER"` | 400 | `userId` is present but not a valid positive integer |
+| `"INTERNAL_ERROR"` | 500 | Unhandled exception from the service or client layer |
 
 Used by:
-- `GET /albums` → HTTP 400 on invalid `userId`
-- `GET /albums` → HTTP 500 on unhandled service/client exception
-- Top-level `UseExceptionHandler` for any other unhandled exception
+- `GET /albums` handler → HTTP 400 on invalid `userId`: `new ErrorResponse("userId must be a positive integer.", "INVALID_PARAMETER", correlationId)`
+- Top-level `UseExceptionHandler` → HTTP 500: `new ErrorResponse("An unexpected error occurred.", "INTERNAL_ERROR", correlationId)`
 
-**System.Text.Json serialisation note**: Record primary-constructor parameters serialise with their parameter name, which is PascalCase by default (`"Message"`). To emit camelCase (`"message"`), configure `JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase` in `Program.cs`:
+**Accessing `correlationId` in handlers**: `CorrelationIdMiddleware` stores the resolved ID in `HttpContext.Items["CorrelationId"]`. Both endpoint handlers and the global exception handler read it via:
+```csharp
+var correlationId = httpContext.Items["CorrelationId"]?.ToString() ?? httpContext.TraceIdentifier;
+```
+
+**System.Text.Json serialisation note**: Record primary-constructor parameters serialise with their parameter name, which is PascalCase by default (`"Message"`, `"Code"`, `"CorrelationId"`). To emit camelCase (`"message"`, `"code"`, `"correlationId"`), configure `JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase` in `Program.cs`:
 ```csharp
 builder.Services.ConfigureHttpJsonOptions(opts =>
     opts.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase);

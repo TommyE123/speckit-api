@@ -47,14 +47,16 @@ Upgrade the existing `src/SpecKitApi` class library to an ASP.NET Core Web appli
    ```csharp
    namespace SpecKitApi.Models;
 
-   public sealed record ErrorResponse(string Message);
+   public sealed record ErrorResponse(string Message, string Code, string CorrelationId);
    ```
+
+   > **Note**: Three fields required by spec (FR-006, SC-004, SC-008). `Code` takes values `"INVALID_PARAMETER"` (400) or `"INTERNAL_ERROR"` (500). `CorrelationId` is read from `HttpContext.Items["CorrelationId"]` in handlers (set by `CorrelationIdMiddleware` in T04).
 
 2. Create `src/SpecKitApi/DTOs/PhotoResponse.cs`:
    ```csharp
    namespace SpecKitApi.DTOs;
 
-   public sealed record PhotoResponse(int Id, int AlbumId, string Title, string Url, string ThumbnailUrl);
+   public sealed record PhotoResponse(int Id, int AlbumId, string Title, string ImageUrl, string ThumbnailUrl);
    ```
 
 3. Create `src/SpecKitApi/DTOs/AlbumResponse.cs`:
@@ -68,10 +70,14 @@ Upgrade the existing `src/SpecKitApi` class library to an ASP.NET Core Web appli
    ```csharp
    namespace SpecKitApi.DTOs;
 
-   public sealed record AlbumWithPhotosResponse(int Id, int UserId, string Title, IReadOnlyList<PhotoResponse> Photos);
+   public sealed record AlbumWithPhotosResponse(
+       AlbumResponse Album,
+       IReadOnlyList<PhotoResponse> Photos);
    ```
 
-5. Run `dotnet build` — zero warnings, zero errors.
+   > **Note**: This is a nested structure — not flat. The JSON wire format is `{ "album": {...}, "photos": [...] }` as defined in `contracts/albums-api.md`. `AlbumWithPhotosResponse` wraps an `AlbumResponse` sub-object, mirroring the domain `AlbumWithPhotos(Album, Photos)` shape.
+
+5. Run `dotnet build SpecKitApi.slnx` — must exit 0 with zero warnings and zero errors.
 
 **Acceptance**: `dotnet build SpecKitApi.slnx` passes with all four new types present.
 
@@ -90,7 +96,7 @@ Upgrade the existing `src/SpecKitApi` class library to an ASP.NET Core Web appli
    - **`GET /health`** (FR-005, SC-001): returns `Results.Ok()` (HTTP 200).
    - **`GET /albums`** (FR-001, FR-002, FR-003, FR-004):
      - Declare `userId` as `string?` so the handler controls the 400 body (see research Q4).
-     - If `userId is not null` and either `!int.TryParse(userId, out var parsedId) || parsedId <= 0`, return `Results.Json(new ErrorResponse("userId must be a positive integer."), statusCode: 400)`.
+     - If `userId is not null` and either `!int.TryParse(userId, out var parsedId) || parsedId <= 0`, return `Results.Json(new ErrorResponse("userId must be a positive integer.", "INVALID_PARAMETER", string.Empty), statusCode: 400)`. (T04 replaces `string.Empty` with the real correlation ID.)
      - Otherwise call `IAlbumService`:
        - No `userId` → `await service.GetAlbumsWithPhotosAsync()`
        - Valid `userId` → `await service.GetAlbumsWithPhotosByUserAsync(parsedId)`
@@ -137,20 +143,29 @@ Upgrade the existing `src/SpecKitApi` class library to an ASP.NET Core Web appli
 1. Create `src/SpecKitApi/Middleware/CorrelationIdMiddleware.cs`:
    - Read `X-Correlation-ID` request header; fall back to `HttpContext.TraceIdentifier`.
    - Echo the value in the `X-Correlation-ID` response header.
+   - Store the value in `context.Items["CorrelationId"]` so handlers can embed it in `ErrorResponse.CorrelationId` (required by FR-006, SC-008).
    - Open `ILogger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId })` around `await _next(context)`.
    - Register as `app.UseMiddleware<CorrelationIdMiddleware>()` in `Program.cs`.
 
-2. In `Program.cs`, add `app.UseExceptionHandler(exceptionApp => { exceptionApp.Run(async ctx => { ... await ctx.Response.WriteAsJsonAsync(new ErrorResponse("An unexpected error occurred.")); }); })` **after** `UseMiddleware<CorrelationIdMiddleware>()` and **before** `app.MapAlbums()`. The handler must:
+2. In `Program.cs`, add `app.UseExceptionHandler(exceptionApp => { exceptionApp.Run(async ctx => { ... }); })` **after** `UseMiddleware<CorrelationIdMiddleware>()` and **before** `app.MapAlbums()`. The handler must:
    - Set `ctx.Response.StatusCode = 500` and `Content-Type: application/json`.
    - Log the exception with the logger (correlation ID already in scope from the middleware).
-   - Write `new ErrorResponse("An unexpected error occurred.")` as JSON — never the raw exception message.
+   - Read `var correlationId = ctx.Items["CorrelationId"]?.ToString() ?? ctx.TraceIdentifier;`
+   - Write `new ErrorResponse("An unexpected error occurred.", "INTERNAL_ERROR", correlationId)` as JSON — never the raw exception message.
 
-3. Remove the `// TODO: T04` stubs from `Program.cs`.
+3. Update the `GET /albums` handler in `AlbumsEndpoints.cs` to pass `correlationId` into `ErrorResponse` for the 400 case:
+   ```csharp
+   var correlationId = httpContext.Items["CorrelationId"]?.ToString() ?? httpContext.TraceIdentifier;
+   return Results.Json(new ErrorResponse("userId must be a positive integer.", "INVALID_PARAMETER", correlationId), statusCode: 400);
+   ```
 
-4. Run `dotnet build` — zero warnings, zero errors.
+4. Remove the `// TODO: T04` stubs from `Program.cs`.
+
+5. Run `dotnet build` — zero warnings, zero errors.
 
 **Acceptance**: 
-- Triggering an unhandled exception in a test stub returns HTTP 500 with `{ "message": "An unexpected error occurred." }` and no stack trace.
+- Triggering an unhandled exception in a test stub returns HTTP 500 with `{ "message": "An unexpected error occurred.", "code": "INTERNAL_ERROR", "correlationId": "..." }` and no stack trace.
+- An invalid `userId` returns HTTP 400 with `{ "message": "userId must be a positive integer.", "code": "INVALID_PARAMETER", "correlationId": "..." }`.
 - Log entries include a `CorrelationId` field consistent across all entries for a request.
 
 ---
@@ -204,8 +219,9 @@ Write the following tests using `xUnit` and `WebApplicationFactory<Program>`:
 4. `GetAlbums_InvalidUserId_ReturnsClientError` — `GET /albums?userId=abc` → HTTP 400; body contains a `message` field; no stack trace (FR-003, SC-004).
 5. `GetAlbums_ZeroUserId_ReturnsBadRequest` — `GET /albums?userId=0` → HTTP 400; body contains a `message` field (FR-003).
 6. `GetAlbums_NegativeUserId_ReturnsBadRequest` — `GET /albums?userId=-1` → HTTP 400; body contains a `message` field (FR-003).
-7. `GetAlbums_ServiceThrows_ReturnsInternalServerError` — stub configured to throw; `GET /albums` → HTTP 500; body contains `message` field; no stack trace, exception type name, or internal path (FR-004, FR-006, SC-007).
+7. `GetAlbums_ServiceThrows_ReturnsInternalServerError` — stub configured to throw; `GET /albums` → HTTP 500; body contains `message`, `code`, and `correlationId` fields; no stack trace, exception type name, or internal path (FR-004, FR-006, SC-007).
 8. `GetAlbums_ResponseContainsCorrelationIdHeader` — `GET /albums` → response contains `X-Correlation-ID` header (FR-007, SC-006).
+9. `GetAlbums_InvalidUserId_ErrorBodyContainsCodeAndCorrelationId` — `GET /albums?userId=abc` → HTTP 400; body contains `message`, `code` (`"INVALID_PARAMETER"`), and `correlationId` (SC-004, SC-008).
 9. `GetHealth_ReturnsOk` — `GET /health` → HTTP 200 (FR-005, SC-001).
 
 All tests must use the stub — **no live network calls**.
