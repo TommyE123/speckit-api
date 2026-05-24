@@ -14,13 +14,15 @@ public sealed class CorrelationIdMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        var correlationId = context.Request.Headers[HeaderName].FirstOrDefault()
-            ?? context.TraceIdentifier;
+        var correlationId =
+            context.Request.Headers[HeaderName].FirstOrDefault() ?? context.TraceIdentifier;
 
         context.Items["CorrelationId"] = correlationId;
         context.Response.Headers[HeaderName] = correlationId;
 
-        using (_logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId }))
+        using (
+            _logger.BeginScope(new Dictionary<string, object> { ["CorrelationId"] = correlationId })
+        )
         {
             await _next(context);
         }

@@ -12,7 +12,9 @@ public interface IAlbumService
     /// </summary>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A read-only list of <see cref="AlbumWithPhotos"/> instances.</returns>
-    Task<IReadOnlyList<AlbumWithPhotos>> GetAlbumsWithPhotosAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<AlbumWithPhotos>> GetAlbumsWithPhotosAsync(
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Retrieves albums with their associated photos filtered by user ID.
@@ -21,5 +23,8 @@ public interface IAlbumService
     /// <param name="userId">The user ID to filter by.</param>
     /// <param name="cancellationToken">A token to cancel the operation.</param>
     /// <returns>A read-only list of <see cref="AlbumWithPhotos"/> instances for the specified user.</returns>
-    Task<IReadOnlyList<AlbumWithPhotos>> GetAlbumsWithPhotosByUserAsync(int userId, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<AlbumWithPhotos>> GetAlbumsWithPhotosByUserAsync(
+        int userId,
+        CancellationToken cancellationToken = default
+    );
 }

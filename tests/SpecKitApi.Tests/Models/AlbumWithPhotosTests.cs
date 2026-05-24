@@ -15,7 +15,10 @@ public class AlbumWithPhotosTests
         };
         var albumWithPhotos = new AlbumWithPhotos(album, photos);
 
-        Assert.All(albumWithPhotos.Photos, photo => Assert.Equal(albumWithPhotos.Album.Id, photo.AlbumId));
+        Assert.All(
+            albumWithPhotos.Photos,
+            photo => Assert.Equal(albumWithPhotos.Album.Id, photo.AlbumId)
+        );
     }
 
     [Fact]

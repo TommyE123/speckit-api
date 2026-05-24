@@ -1,0 +1,309 @@
+{
+  "workflow": "speckit",
+  "specName": "005-add-analyzer-packages",
+  "branch": "005-add-analyzer-packages",
+  "selectedAt": "2026-05-24T11:53:57.419Z",
+  "currentStep": "implement",
+  "status": "completed",
+  "stepHistory": {
+    "specify": {
+      "startedAt": "2026-05-24T11:51:26.246Z",
+      "completedAt": "2026-05-24T11:54:08.968Z"
+    },
+    "plan": {
+      "startedAt": "2026-05-24T11:54:08.961Z",
+      "completedAt": "2026-05-24T11:54:08.961Z"
+    },
+    "tasks": {
+      "startedAt": "2026-05-24T12:01:46.414Z",
+      "completedAt": "2026-05-24T12:11:40.292Z"
+    },
+    "analyze": {
+      "startedAt": "2026-05-24T12:03:08.967Z",
+      "completedAt": "2026-05-24T12:11:25.957Z"
+    },
+    "implement": {
+      "startedAt": "2026-05-24T12:11:40.299Z",
+      "completedAt": null
+    }
+  },
+  "transitions": [
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T11:54:08.961Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T11:54:08.968Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T11:54:29Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": "generate"
+      },
+      "by": "ai",
+      "at": "2026-05-24T12:00:30Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:01:46.414Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T12:02:28Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": "generate"
+      },
+      "by": "ai",
+      "at": "2026-05-24T12:02:37Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:03:08.967Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "from": {
+        "step": "analyze",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:11:23.352Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "from": {
+        "step": "analyze",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:11:25.957Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:11:40.292Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "from": {
+        "step": "analyze",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:11:40.299Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T12:11:58Z"
+    },
+    {
+      "step": "implement",
+      "substep": "run-tests",
+      "from": {
+        "step": "implement",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T12:13:45Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "from": {
+        "step": "implement",
+        "substep": "run-tests"
+      },
+      "by": "ai",
+      "at": "2026-05-24T12:14:02Z"
+    }
+  ],
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Created Directory.Build.props at repository root with TreatWarningsAsErrors=true.",
+      "files": ["Directory.Build.props"]
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Removed redundant TreatWarningsAsErrors from SpecKitApi.csproj (now inherited from Directory.Build.props).",
+      "files": ["src/SpecKitApi/SpecKitApi.csproj"]
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Created .csharpierignore with **/obj/ and **/bin/ exclusions.",
+      "files": [".csharpierignore"]
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Created .editorconfig with root=true and generated_code=true for obj/bin directories.",
+      "files": [".editorconfig"]
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "Confirmed dotnet build passes with zero errors/warnings after all packages added.",
+      "files": []
+    },
+    "T006": {
+      "status": "DONE",
+      "did": "All 41 existing xUnit tests pass after changes.",
+      "files": []
+    },
+    "T007": {
+      "status": "DONE",
+      "did": "Added CSharpier.MsBuild 1.2.6 PackageReference to SpecKitApi.csproj.",
+      "files": ["src/SpecKitApi/SpecKitApi.csproj"]
+    },
+    "T008": {
+      "status": "DONE",
+      "did": "Added CSharpier.MsBuild 1.2.6 PackageReference to SpecKitApi.Tests.csproj.",
+      "files": ["tests/SpecKitApi.Tests/SpecKitApi.Tests.csproj"]
+    },
+    "T009": {
+      "status": "DONE",
+      "did": "Ran dotnet restore; all packages resolved successfully.",
+      "files": []
+    },
+    "T010": {
+      "status": "DONE",
+      "did": "Ran csharpier format . reformatting 29 files in-place.",
+      "files": []
+    },
+    "T011": {
+      "status": "DONE",
+      "did": "Build passed with zero CSharpier diagnostics after formatting.",
+      "files": []
+    },
+    "T012": {
+      "status": "DONE",
+      "did": "dotnet build exits with 0 errors and 0 warnings; CSharpier US1 acceptance gate passed.",
+      "files": []
+    },
+    "T013": {
+      "status": "DONE",
+      "did": "Added all three Roslynator 4.15.0 PackageReferences to SpecKitApi.csproj.",
+      "files": ["src/SpecKitApi/SpecKitApi.csproj"]
+    },
+    "T014": {
+      "status": "DONE",
+      "did": "Added all three Roslynator 4.15.0 PackageReferences to SpecKitApi.Tests.csproj.",
+      "files": ["tests/SpecKitApi.Tests/SpecKitApi.Tests.csproj"]
+    },
+    "T015": {
+      "status": "DONE",
+      "did": "Ran dotnet restore and build; zero Roslynator diagnostics surfaced — codebase already clean.",
+      "files": []
+    },
+    "T021": {
+      "status": "DONE",
+      "did": "Build passes with zero RCS* diagnostics and zero total warnings/errors.",
+      "files": []
+    },
+    "T022": {
+      "status": "DONE",
+      "did": "All 41 tests pass after Roslynator packages added.",
+      "files": []
+    },
+    "T023": {
+      "status": "DONE",
+      "did": "Added JetBrains.Annotations 2025.2.4 PackageReference to SpecKitApi.csproj.",
+      "files": ["src/SpecKitApi/SpecKitApi.csproj"]
+    },
+    "T024": {
+      "status": "DONE",
+      "did": "Added JetBrains.Annotations 2025.2.4 PackageReference to SpecKitApi.Tests.csproj.",
+      "files": ["tests/SpecKitApi.Tests/SpecKitApi.Tests.csproj"]
+    },
+    "T025": {
+      "status": "DONE",
+      "did": "JetBrains.Annotations 2025.2.4 resolves in both projects after dotnet restore.",
+      "files": []
+    },
+    "T026": {
+      "status": "DONE",
+      "did": "Build passes with zero new warnings or errors from JetBrains.Annotations.",
+      "files": []
+    },
+    "T027": {
+      "status": "DONE",
+      "did": "Both project files reference identical package IDs and exact versions for all five packages.",
+      "files": ["src/SpecKitApi/SpecKitApi.csproj", "tests/SpecKitApi.Tests/SpecKitApi.Tests.csproj"]
+    },
+    "T028": {
+      "status": "DONE",
+      "did": "No NoWarn entries for CSharpier/Roslynator diagnostics and no pragma suppressions in any .cs file.",
+      "files": []
+    },
+    "T029": {
+      "status": "DONE",
+      "did": "Final dotnet build passes with 0 errors and 0 warnings.",
+      "files": []
+    },
+    "T030": {
+      "status": "DONE",
+      "did": "Final dotnet test passes with 41/41 tests at 100% pass rate.",
+      "files": []
+    }
+  }
+}

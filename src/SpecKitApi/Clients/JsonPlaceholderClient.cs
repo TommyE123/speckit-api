@@ -20,17 +20,23 @@ public sealed class JsonPlaceholderClient : IJsonPlaceholderClient
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<AlbumDto>> GetAlbumsAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<AlbumDto>> GetAlbumsAsync(
+        CancellationToken cancellationToken = default
+    )
     {
-        var result = await _httpClient.GetFromJsonAsync<List<AlbumDto>>("/albums", cancellationToken)
+        var result = await _httpClient
+            .GetFromJsonAsync<List<AlbumDto>>("/albums", cancellationToken)
             .ConfigureAwait(false);
         return result ?? [];
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<PhotoDto>> GetPhotosAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<PhotoDto>> GetPhotosAsync(
+        CancellationToken cancellationToken = default
+    )
     {
-        var result = await _httpClient.GetFromJsonAsync<List<PhotoDto>>("/photos", cancellationToken)
+        var result = await _httpClient
+            .GetFromJsonAsync<List<PhotoDto>>("/photos", cancellationToken)
             .ConfigureAwait(false);
         return result ?? [];
     }
