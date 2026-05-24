@@ -1,13 +1,13 @@
 {
   "workflow": "speckit",
-  "selectedAt": "2026-05-23T13:35:55Z",
-  "currentStep": "analyze",
+  "selectedAt": "2026-05-23T12:35:00.000Z",
+  "currentStep": "implement",
   "status": "completed",
   "specName": "JSONPlaceholder Core",
   "branch": "001-jsonplaceholder-core",
   "stepHistory": {
     "specify": {
-      "startedAt": "2026-05-23T13:35:55Z",
+      "startedAt": "2026-05-23T12:35:00.000Z",
       "completedAt": "2026-05-23T12:37:24.874Z"
     },
     "plan": {
@@ -373,17 +373,23 @@
     "T001": {
       "status": "DONE",
       "did": "Created SpecKitApi.slnx at repository root using dotnet new sln.",
-      "files": ["SpecKitApi.slnx"]
+      "files": [
+        "SpecKitApi.slnx"
+      ]
     },
     "T002": {
       "status": "DONE",
       "did": "Created src/SpecKitApi/SpecKitApi.csproj targeting net10.0 with Microsoft.Extensions.Http and Microsoft.Extensions.Http.Resilience.",
-      "files": ["src/SpecKitApi/SpecKitApi.csproj"]
+      "files": [
+        "src/SpecKitApi/SpecKitApi.csproj"
+      ]
     },
     "T003": {
       "status": "DONE",
       "did": "Created tests/SpecKitApi.Tests/SpecKitApi.Tests.csproj targeting net10.0 with xunit, Moq, and test SDK packages.",
-      "files": ["tests/SpecKitApi.Tests/SpecKitApi.Tests.csproj"]
+      "files": [
+        "tests/SpecKitApi.Tests/SpecKitApi.Tests.csproj"
+      ]
     },
     "T004": {
       "status": "DONE",
@@ -396,62 +402,86 @@
     "T005": {
       "status": "DONE",
       "did": "Created appsettings.json with JsonPlaceholderOptions:BaseUrl set to https://jsonplaceholder.typicode.com.",
-      "files": ["src/SpecKitApi/appsettings.json"]
+      "files": [
+        "src/SpecKitApi/appsettings.json"
+      ]
     },
     "T006": {
       "status": "DONE",
       "did": "Created JsonPlaceholderOptions.cs sealed POCO with SectionName constant and BaseUrl property.",
-      "files": ["src/SpecKitApi/Options/JsonPlaceholderOptions.cs"]
+      "files": [
+        "src/SpecKitApi/Options/JsonPlaceholderOptions.cs"
+      ]
     },
     "T007": {
       "status": "DONE",
       "did": "Created AlbumDto.cs sealed class with JsonPropertyName attributes for Id, UserId, Title.",
-      "files": ["src/SpecKitApi/DTOs/AlbumDto.cs"]
+      "files": [
+        "src/SpecKitApi/DTOs/AlbumDto.cs"
+      ]
     },
     "T008": {
       "status": "DONE",
       "did": "Created PhotoDto.cs sealed class with JsonPropertyName attributes for all five fields.",
-      "files": ["src/SpecKitApi/DTOs/PhotoDto.cs"]
+      "files": [
+        "src/SpecKitApi/DTOs/PhotoDto.cs"
+      ]
     },
     "T009": {
       "status": "DONE",
       "did": "Created Album.cs sealed record with Id, UserId, Title.",
-      "files": ["src/SpecKitApi/Models/Album.cs"]
+      "files": [
+        "src/SpecKitApi/Models/Album.cs"
+      ]
     },
     "T010": {
       "status": "DONE",
       "did": "Created Photo.cs sealed record with Id, AlbumId, Title, ImageUrl, ThumbnailUrl.",
-      "files": ["src/SpecKitApi/Models/Photo.cs"]
+      "files": [
+        "src/SpecKitApi/Models/Photo.cs"
+      ]
     },
     "T011": {
       "status": "DONE",
       "did": "Created AlbumWithPhotos.cs sealed record with Album and IReadOnlyList<Photo> Photos.",
-      "files": ["src/SpecKitApi/Models/AlbumWithPhotos.cs"]
+      "files": [
+        "src/SpecKitApi/Models/AlbumWithPhotos.cs"
+      ]
     },
     "T012": {
       "status": "DONE",
       "did": "Created IJsonPlaceholderClient.cs interface with GetAlbumsAsync and GetPhotosAsync.",
-      "files": ["src/SpecKitApi/Clients/IJsonPlaceholderClient.cs"]
+      "files": [
+        "src/SpecKitApi/Clients/IJsonPlaceholderClient.cs"
+      ]
     },
     "T013": {
       "status": "DONE",
       "did": "Created IAlbumService.cs interface with GetAlbumsWithPhotosAsync and GetAlbumsWithPhotosByUserAsync.",
-      "files": ["src/SpecKitApi/Services/IAlbumService.cs"]
+      "files": [
+        "src/SpecKitApi/Services/IAlbumService.cs"
+      ]
     },
     "T014": {
       "status": "DONE",
       "did": "Wrote AlbumDtoTests.cs asserting correct deserialization of AlbumDto from JSON.",
-      "files": ["tests/SpecKitApi.Tests/DTOs/AlbumDtoTests.cs"]
+      "files": [
+        "tests/SpecKitApi.Tests/DTOs/AlbumDtoTests.cs"
+      ]
     },
     "T015": {
       "status": "DONE",
       "did": "Wrote PhotoDtoTests.cs asserting correct deserialization of all five PhotoDto fields.",
-      "files": ["tests/SpecKitApi.Tests/DTOs/PhotoDtoTests.cs"]
+      "files": [
+        "tests/SpecKitApi.Tests/DTOs/PhotoDtoTests.cs"
+      ]
     },
     "T016": {
       "status": "DONE",
       "did": "Wrote AlbumWithPhotosTests.cs asserting every Photo.AlbumId matches parent Album.Id.",
-      "files": ["tests/SpecKitApi.Tests/Models/AlbumWithPhotosTests.cs"]
+      "files": [
+        "tests/SpecKitApi.Tests/Models/AlbumWithPhotosTests.cs"
+      ]
     },
     "T017": {
       "status": "DONE",
@@ -473,37 +503,51 @@
     "T019": {
       "status": "DONE",
       "did": "Wrote JsonPlaceholderClientTests.cs with 6 test cases using hand-rolled MockHttpMessageHandler.",
-      "files": ["tests/SpecKitApi.Tests/Clients/JsonPlaceholderClientTests.cs"]
+      "files": [
+        "tests/SpecKitApi.Tests/Clients/JsonPlaceholderClientTests.cs"
+      ]
     },
     "T020": {
       "status": "DONE",
       "did": "Wrote AlbumServiceTests.cs with 6 combine/mapping test cases using Moq-mocked IJsonPlaceholderClient.",
-      "files": ["tests/SpecKitApi.Tests/Services/AlbumServiceTests.cs"]
+      "files": [
+        "tests/SpecKitApi.Tests/Services/AlbumServiceTests.cs"
+      ]
     },
     "T021": {
       "status": "DONE",
       "did": "Implemented JsonPlaceholderClient.cs using GetFromJsonAsync for /albums and /photos endpoints.",
-      "files": ["src/SpecKitApi/Clients/JsonPlaceholderClient.cs"]
+      "files": [
+        "src/SpecKitApi/Clients/JsonPlaceholderClient.cs"
+      ]
     },
     "T022": {
       "status": "DONE",
       "did": "Implemented AlbumService.GetAlbumsWithPhotosAsync with Task.WhenAll, Dictionary grouping, and inline DTO mapping.",
-      "files": ["src/SpecKitApi/Services/AlbumService.cs"]
+      "files": [
+        "src/SpecKitApi/Services/AlbumService.cs"
+      ]
     },
     "T023": {
       "status": "DONE",
       "did": "Extended AlbumServiceTests with 4 filter test cases for GetAlbumsWithPhotosByUserAsync.",
-      "files": ["tests/SpecKitApi.Tests/Services/AlbumServiceTests.cs"]
+      "files": [
+        "tests/SpecKitApi.Tests/Services/AlbumServiceTests.cs"
+      ]
     },
     "T024": {
       "status": "DONE",
       "did": "Implemented AlbumService.GetAlbumsWithPhotosByUserAsync filtering by userId.",
-      "files": ["src/SpecKitApi/Services/AlbumService.cs"]
+      "files": [
+        "src/SpecKitApi/Services/AlbumService.cs"
+      ]
     },
     "T025": {
       "status": "DONE",
       "did": "Created ServiceCollectionExtensions.cs with AddJsonPlaceholderServices wiring typed client with resilience policies and scoped AlbumService.",
-      "files": ["src/SpecKitApi/Extensions/ServiceCollectionExtensions.cs"],
+      "files": [
+        "src/SpecKitApi/Extensions/ServiceCollectionExtensions.cs"
+      ],
       "concerns": [
         "Microsoft.Extensions.Http.Polly is incompatible with .NET 10; used Microsoft.Extensions.Http.Resilience v10.6.0 with AddStandardResilienceHandler() as equivalent replacement."
       ]
@@ -530,12 +574,16 @@
     "T028": {
       "status": "DONE",
       "did": "Enabled GenerateDocumentationFile and Nullable in SpecKitApi.csproj and fixed nullable warnings.",
-      "files": ["src/SpecKitApi/SpecKitApi.csproj"]
+      "files": [
+        "src/SpecKitApi/SpecKitApi.csproj"
+      ]
     },
     "T029": {
       "status": "DONE",
       "did": "Enabled TreatWarningsAsErrors in SpecKitApi.csproj and resolved all warnings for clean build.",
-      "files": ["src/SpecKitApi/SpecKitApi.csproj"]
+      "files": [
+        "src/SpecKitApi/SpecKitApi.csproj"
+      ]
     },
     "T030": {
       "status": "DONE",

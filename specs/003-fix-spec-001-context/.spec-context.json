@@ -1,0 +1,277 @@
+{
+  "workflow": "speckit",
+  "selectedAt": "2026-05-24T09:08:17+01:00",
+  "currentStep": "implement",
+  "status": "completed",
+  "specName": "Fix Spec 001 Context",
+  "branch": "003-fix-spec-001-context",
+  "stepHistory": {
+    "specify": {
+      "startedAt": "2026-05-24T09:08:17+01:00",
+      "completedAt": "2026-05-24T08:12:21.044Z"
+    },
+    "plan": {
+      "startedAt": "2026-05-24T08:12:21.055Z",
+      "completedAt": "2026-05-24T08:28:42.153Z"
+    },
+    "tasks": {
+      "startedAt": "2026-05-24T08:28:42.161Z",
+      "completedAt": "2026-05-24T08:30:39.597Z"
+    },
+    "implement": {
+      "startedAt": "2026-05-24T08:30:39.613Z",
+      "completedAt": null
+    }
+  },
+  "transitions": [
+    {
+      "step": "specify",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:12:21.044Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:12:21.055Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:13:44Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:14:00Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "from": {
+        "step": "plan",
+        "substep": "research"
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:15:00Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:16:25.362Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:16:25.369Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:17:22Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:17:37Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": "generate"
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:18:39Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:19:36.809Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:19:36.820Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:28:42.153Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:28:42.161Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:29:23Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:29:30Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": "generate"
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:29:39Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:30:39.597Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:30:39.613Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "from": {
+        "step": "implement",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:30:58Z"
+    },
+    {
+      "step": "implement",
+      "substep": "run-tests",
+      "from": {
+        "step": "implement",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:31:40Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "from": {
+        "step": "implement",
+        "substep": "run-tests"
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:32:49Z"
+    }
+  ],
+  "task_summaries": {
+    "T001": {
+      "status": "DONE",
+      "did": "Verified that currentStep in specs/001-jsonplaceholder-core/.spec-context.json equals 'implement'.",
+      "files": []
+    },
+    "T002": {
+      "status": "DONE",
+      "did": "Verified timestamp chronology: selectedAt equals startedAt and both precede completedAt in specs/001-jsonplaceholder-core/.spec-context.json.",
+      "files": []
+    },
+    "T003": {
+      "status": "DONE",
+      "did": "Confirmed git diff --name-only HEAD -- src/ tests/ produces empty output — no source or test files modified.",
+      "files": []
+    },
+    "T004": {
+      "status": "DONE",
+      "did": "Confirmed git status clean for src/ and tests/; all other fields in specs/001-jsonplaceholder-core/.spec-context.json intact.",
+      "files": []
+    },
+    "T005": {
+      "status": "DONE",
+      "did": "All four verification tasks T001-T004 passed; both issues (currentStep and timestamps) confirmed pre-resolved; feature branch committed.",
+      "files": [
+        "specs/003-fix-spec-001-context/.spec-context.json"
+      ]
+    }
+  }
+}
