@@ -10,6 +10,8 @@ description: "Task list for JSONPlaceholder Core Data Layer"
 
 **Prerequisites**: plan.md ✅, spec.md ✅, research.md ✅, data-model.md ✅, quickstart.md ✅
 
+**Plan regenerated**: 2026-05-24T06:24:22Z — all T001–T031 complete; task history preserved.
+
 **Phase Map**: Phase 1 = Setup | Phase 2 = Foundation (types/interfaces) | Phase 3 = US3 (DTO/model validation) | Phase 4 = US1 (fetch + combine) | Phase 5 = US2 (user filter) | Phase 6 = DI registration | Phase 7 = Polish
 
 **Tests**: Test tasks are MANDATORY per Principle III (Test-First, NON-NEGOTIABLE). Tests MUST be written and confirmed failing before implementation begins (Red-Green-Refactor). Do not skip or defer test tasks.
@@ -28,10 +30,10 @@ description: "Task list for JSONPlaceholder Core Data Layer"
 
 **Purpose**: Solution and project scaffolding. No business logic — just a compilable skeleton.
 
-- [x] T001 Create solution file `SpecKitApi.sln` at repository root with `dotnet new sln -n SpecKitApi`
-- [x] T002 Create source project `src/SpecKitApi/SpecKitApi.csproj` targeting `net10.0` and add NuGet packages: `Microsoft.Extensions.Http`, `Microsoft.Extensions.Http.Polly` via `dotnet add package`
+- [x] T001 Create solution file `SpecKitApi.slnx` at repository root with `dotnet new sln -n SpecKitApi`
+- [x] T002 Create source project `src/SpecKitApi/SpecKitApi.csproj` targeting `net10.0` and add NuGet packages: `Microsoft.Extensions.Http`, `Microsoft.Extensions.Http.Resilience` via `dotnet add package` — note: `Microsoft.Extensions.Http.Polly` is incompatible with .NET 10; `Microsoft.Extensions.Http.Resilience` v10.6.0 is the correct replacement providing `AddStandardResilienceHandler()`
 - [x] T003 Create test project `tests/SpecKitApi.Tests/SpecKitApi.Tests.csproj` targeting `net10.0` and add NuGet packages: `xunit`, `xunit.runner.visualstudio`, `Microsoft.NET.Test.Sdk`, `Moq`, `coverlet.collector` via `dotnet add package`
-- [x] T004 Add `tests/SpecKitApi.Tests` → `src/SpecKitApi` project reference and add both projects to `SpecKitApi.sln`
+- [x] T004 Add `tests/SpecKitApi.Tests` → `src/SpecKitApi` project reference and add both projects to `SpecKitApi.slnx`
 - [x] T005 [P] Create `src/SpecKitApi/appsettings.json` with a `"JsonPlaceholderOptions"` section containing `"BaseUrl": "https://jsonplaceholder.typicode.com"` (nested object, not colon-delimited path)
 - [x] T006 [P] Create `src/SpecKitApi/Options/JsonPlaceholderOptions.cs` — sealed POCO with `SectionName` constant and `BaseUrl` string property
 
@@ -130,7 +132,7 @@ description: "Task list for JSONPlaceholder Core Data Layer"
 
 **Purpose**: Wire the typed HTTP client, Polly resilience policies, and service into the DI container so the project is ready for feature 002 endpoints.
 
-- [x] T025 Create `src/SpecKitApi/Extensions/ServiceCollectionExtensions.cs` — static extension method `AddJsonPlaceholderServices(IServiceCollection, IConfiguration)` that: binds `JsonPlaceholderOptions` from config, registers `IJsonPlaceholderClient`/`JsonPlaceholderClient` typed client with base address from options, attaches Polly 3-retry exponential backoff (1s/2s/4s) and 10-second timeout per plan.md Architecture A2, and registers `IAlbumService`/`AlbumService` as scoped per plan.md Phase 4b
+- [x] T025 Create `src/SpecKitApi/Extensions/ServiceCollectionExtensions.cs` — static extension method `AddJsonPlaceholderServices(IServiceCollection, IConfiguration)` that: binds `JsonPlaceholderOptions` from config, registers `IJsonPlaceholderClient`/`JsonPlaceholderClient` typed client with base address from options, attaches `.AddStandardResilienceHandler()` (from `Microsoft.Extensions.Http.Resilience` — used in place of Polly which is incompatible with .NET 10), and registers `IAlbumService`/`AlbumService` as scoped per plan.md Phase 4b
 
 **Checkpoint**: `dotnet build` succeeds. DI extension is ready; `Program.cs` will call it in feature 002.
 
@@ -237,3 +239,4 @@ T020: tests/SpecKitApi.Tests/Services/AlbumServiceTests.cs (combine cases)
 - Base URL sourced from `appsettings.json` — never hardcoded (constitution mandate)
 - No `Endpoints/` folder, no `Program.cs` — deferred to feature 002
 - Each checkpoint is a valid stopping point; tests must be green before advancing
+- **Resilience policy**: `Microsoft.Extensions.Http.Polly` is incompatible with .NET 10. The equivalent replacement is `Microsoft.Extensions.Http.Resilience v10.6.0` using `AddStandardResilienceHandler()`, which provides standard retry, timeout, and circuit-breaker policies. Tasks T002 and T025 reflect this substitution.
