@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics;
+using Scalar.AspNetCore;
 using SpecKitApi.Endpoints;
 using SpecKitApi.Extensions;
 using SpecKitApi.Middleware;
@@ -7,10 +8,18 @@ using SpecKitApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddJsonPlaceholderServices(builder.Configuration);
+builder.Services.AddOpenApi("v1");
 
 var app = builder.Build();
 
 app.UseMiddleware<CorrelationIdMiddleware>();
+
+app.MapOpenApi();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapScalarApiReference();
+}
 
 app.UseExceptionHandler(exceptionApp =>
 {
