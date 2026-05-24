@@ -25,7 +25,7 @@ description: "Task list for Add Scalar OpenAPI UI"
 
 **Purpose**: Add the single new NuGet dependency required by the feature. This is a project-file-only change and does not modify application code.
 
-- [X] T001 Add `<PackageReference Include="Scalar.AspNetCore" Version="2.*" />` to `src/SpecKitApi/SpecKitApi.csproj` inside the existing `<ItemGroup>` block, then run `dotnet restore SpecKitApi.slnx` from the repository root to confirm the package resolves successfully
+- [X] T001 Add `<PackageReference Include="Scalar.AspNetCore" Version="2.14.14" />` to `src/SpecKitApi/SpecKitApi.csproj` inside the existing `<ItemGroup>` block, then run `dotnet restore SpecKitApi.slnx` from the repository root to confirm the package resolves successfully
 
 ---
 
