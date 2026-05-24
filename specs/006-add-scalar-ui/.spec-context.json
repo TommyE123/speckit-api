@@ -1,0 +1,312 @@
+{
+  "workflow": "speckit",
+  "selectedAt": "2026-05-24T12:26:25Z",
+  "currentStep": "implement",
+  "status": "completed",
+  "specName": "Add Scalar UI",
+  "branch": "006-add-scalar-ui",
+  "stepHistory": {
+    "specify": {
+      "startedAt": "2026-05-24T12:26:25Z",
+      "completedAt": "2026-05-24T12:58:28.026Z"
+    },
+    "plan": {
+      "startedAt": "2026-05-24T13:14:53.663Z",
+      "completedAt": "2026-05-24T13:23:06.121Z"
+    },
+    "tasks": {
+      "startedAt": "2026-05-24T13:23:06.121Z",
+      "completedAt": "2026-05-24T13:27:21Z"
+    },
+    "implement": {
+      "startedAt": "2026-05-24T13:27:21Z",
+      "completedAt": "2026-05-24T13:48:11Z"
+    },
+    "analyze": {
+      "startedAt": "2026-05-24T12:48:12.318Z",
+      "completedAt": "2026-05-24T13:14:22.008Z"
+    }
+  },
+  "transitions": [
+    {
+      "step": "specify",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:34:40.007Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:34:40.021Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:39:59.935Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T12:41:04Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": "generate"
+      },
+      "by": "ai",
+      "at": "2026-05-24T12:46:33Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:47:25.884Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "from": {
+        "step": "analyze",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:48:12.318Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:58:28.026Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "analyze",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T12:58:28.034Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:00:01Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "from": {
+        "step": "plan",
+        "substep": "research"
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:00:08Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": "design"
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:00:16Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T13:01:00.264Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:01:44Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:02:00Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "from": {
+        "step": "plan",
+        "substep": "research"
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:05:00Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": "design"
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:12:36Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "from": {
+        "step": "analyze",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T13:13:36.526Z"
+    },
+    {
+      "step": "analyze",
+      "substep": null,
+      "from": {
+        "step": "analyze",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T13:14:22.008Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T13:14:53.663Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:16:59Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:16:59Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "from": {
+        "step": "plan",
+        "substep": "research"
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:17:00Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": "design"
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:17:00Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T13:23:06.121Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:23:52Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:23:52Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": "generate"
+      },
+      "by": "ai",
+      "at": "2026-05-24T13:27:21Z"
+    }
+  ]
+}
