@@ -1,0 +1,424 @@
+{
+  "workflow": "speckit",
+  "selectedAt": "2026-05-24T09:40:59Z",
+  "currentStep": "implement",
+  "status": "completed",
+  "specName": "Albums API Endpoints",
+  "branch": "004-albums-api-endpoints",
+  "stepHistory": {
+    "specify": {
+      "startedAt": "2026-05-24T09:40:59Z",
+      "completedAt": "2026-05-24T09:11:36.334Z"
+    },
+    "plan": {
+      "startedAt": "2026-05-24T09:21:06.158Z",
+      "completedAt": "2026-05-24T09:32:23.827Z"
+    },
+    "tasks": {
+      "startedAt": "2026-05-24T09:32:23.827Z",
+      "completedAt": "2026-05-24T09:35:20.574Z"
+    },
+    "implement": {
+      "startedAt": "2026-05-24T09:35:20.585Z",
+      "completedAt": null
+    }
+  },
+  "transitions": [
+    {
+      "step": "specify",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:43:05.461Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:43:05.472Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:43:42Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:49:14.674Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:49:14.687Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:50:20Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:50:36Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": "generate"
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:51:43Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T08:56:14.612Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T08:57:36Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T09:06:34.409Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:07:46Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:07:46Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": "generate"
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:09:46Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T09:11:36.334Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T09:11:36.343Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:13:25Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:13:26Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "from": {
+        "step": "plan",
+        "substep": "research"
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:13:27Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": "design"
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:13:54Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T09:21:06.158Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:21:46Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:21:50Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "from": {
+        "step": "plan",
+        "substep": "research"
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:23:00Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": "design"
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:28:27Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T09:32:23.827Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:33:11Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:33:21Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": "generate"
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:34:12Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T09:35:20.574Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-24T09:35:20.585Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:36:19Z"
+    },
+    {
+      "step": "implement",
+      "substep": "run-tests",
+      "from": {
+        "step": "implement",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:38:48Z"
+    },
+    {
+      "step": "implement",
+      "substep": null,
+      "from": {
+        "step": "implement",
+        "substep": "run-tests"
+      },
+      "by": "ai",
+      "at": "2026-05-24T09:38:48Z"
+    }
+  ],
+  "task_summaries": {
+    "T01": {
+      "status": "DONE",
+      "did": "Changed SpecKitApi.csproj SDK to Microsoft.NET.Sdk.Web and removed the redundant Microsoft.Extensions.Http package reference.",
+      "files": ["src/SpecKitApi/SpecKitApi.csproj"]
+    },
+    "T02": {
+      "status": "DONE",
+      "did": "Created ErrorResponse, AlbumResponse, PhotoResponse, and AlbumWithPhotosResponse record types.",
+      "files": [
+        "src/SpecKitApi/Models/ErrorResponse.cs",
+        "src/SpecKitApi/DTOs/AlbumResponse.cs",
+        "src/SpecKitApi/DTOs/PhotoResponse.cs",
+        "src/SpecKitApi/DTOs/AlbumWithPhotosResponse.cs"
+      ]
+    },
+    "T03": {
+      "status": "DONE",
+      "did": "Created Program.cs with WebApplication entry point and AlbumsEndpoints.cs with GET /health and GET /albums Minimal API routes.",
+      "files": [
+        "src/SpecKitApi/Program.cs",
+        "src/SpecKitApi/Endpoints/AlbumsEndpoints.cs"
+      ]
+    },
+    "T04": {
+      "status": "DONE",
+      "did": "Created CorrelationIdMiddleware and wired global exception handler returning structured ErrorResponse with INTERNAL_ERROR code.",
+      "files": [
+        "src/SpecKitApi/Middleware/CorrelationIdMiddleware.cs",
+        "src/SpecKitApi/Program.cs"
+      ]
+    },
+    "T05": {
+      "status": "DONE",
+      "did": "Added Microsoft.AspNetCore.Mvc.Testing package reference to the test project.",
+      "files": ["tests/SpecKitApi.Tests/SpecKitApi.Tests.csproj"]
+    },
+    "T06": {
+      "status": "DONE",
+      "did": "Created StubJsonPlaceholderClient and 10 integration tests covering all FR/SC scenarios; all pass.",
+      "files": [
+        "tests/SpecKitApi.Tests/Integration/Helpers/StubJsonPlaceholderClient.cs",
+        "tests/SpecKitApi.Tests/Integration/AlbumsEndpointsIntegrationTests.cs"
+      ]
+    },
+    "T07": {
+      "status": "DONE",
+      "did": "Verified all 31 pre-existing unit tests remain green after the SDK upgrade and new file additions.",
+      "files": []
+    },
+    "T08": {
+      "status": "DONE",
+      "did": "Updated README.md Getting Started section with correct run command and curl examples for /health, /albums, and /albums?userId=1.",
+      "files": ["README.md"]
+    }
+  }
+}

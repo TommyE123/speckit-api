@@ -1,5 +1,5 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan at:
-specs/003-fix-spec-001-context/plan.md
+specs/004-albums-api-endpoints/plan.md
 <!-- SPECKIT END -->
