@@ -168,5 +168,8 @@ public sealed class AlbumsEndpointsIntegrationTests : IClassFixture<WebApplicati
         var response = await client.GetAsync("/health");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var json = await response.Content.ReadAsStringAsync();
+        var doc = JsonDocument.Parse(json);
+        Assert.Equal("healthy", doc.RootElement.GetProperty("status").GetString());
     }
 }

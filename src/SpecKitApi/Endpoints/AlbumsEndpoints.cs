@@ -9,7 +9,7 @@ public static class AlbumsEndpoints
 {
     public static IEndpointRouteBuilder MapAlbums(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/health", () => Results.Ok());
+        app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
         app.MapGet("/albums", async (
             string? userId,
