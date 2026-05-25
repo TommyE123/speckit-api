@@ -889,9 +889,7 @@
     "T001": {
       "status": "DONE",
       "did": "Created `.github/workflows/build.yml` with checkout, .NET 10 setup, NuGet caching, restore, build (Release, --no-restore), and test (Release, --no-build) steps.",
-      "files": [
-        ".github/workflows/build.yml"
-      ]
+      "files": [".github/workflows/build.yml"]
     },
     "T002": {
       "status": "DONE",
@@ -901,9 +899,7 @@
     "T003": {
       "status": "DONE",
       "did": "Confirmed `.github/workflows/build.yml` is well-formed and readable; `actionlint` not available but file content validated manually.",
-      "files": [
-        ".github/workflows/build.yml"
-      ]
+      "files": [".github/workflows/build.yml"]
     }
   }
 }
