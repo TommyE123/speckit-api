@@ -9,9 +9,9 @@ description: "Task list for GitHub Actions CI Build Workflow"
 
 **Prerequisites**: plan.md ✅, spec.md ✅, research.md ✅, quickstart.md ✅
 
-**Tests**: TDD is EXEMPT for this feature — the sole deliverable is a YAML configuration file with no unit-testable application logic (Principle III exemption confirmed in plan.md). Acceptance validation is by live GitHub Actions execution against spec.md acceptance scenarios.
+**Tests**: TDD is EXEMPT for this feature — the sole deliverable is YAML configuration files with no unit-testable application logic (Principle III exemption confirmed in plan.md). Acceptance validation is by live GitHub Actions execution against spec.md acceptance scenarios.
 
-**Organization**: Tasks are grouped by phase. All tasks produce changes to the single deliverable file `.github/workflows/build.yml`.
+**Organization**: Tasks are grouped by phase. Tasks produce changes to `.github/workflows/build.yml` and the new `codecoverage.runsettings` file at repository root.
 
 ## Format: `[ID] [P?] [Story?] Description with file path`
 
@@ -55,7 +55,7 @@ description: "Task list for GitHub Actions CI Build Workflow"
 - [X] T006 [US1] Add `push` trigger with `branches: [ main ]` to the `on:` block in `.github/workflows/build.yml` (FR-001)
 - [X] T007 [US1] Add `Restore` step (`run: dotnet restore`) to `.github/workflows/build.yml` (FR-004)
 - [X] T008 [US1] Add `Build` step (`run: dotnet build --configuration Release --no-restore --warnaserror`) to `.github/workflows/build.yml` (FR-005, FR-008; `--warnaserror` required by spec; `Directory.Build.props` also enforces `TreatWarningsAsErrors=true` at the MSBuild level — the CLI flag is redundant but mandatory per FR-008)
-- [X] T009 [US1] Add `Test` step (`run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage" --logger trx --results-directory ./TestResults`) to `.github/workflows/build.yml` (FR-006, FR-007, FR-012)
+- [X] T009 [US1] Add `Test` step with XPlat Code Coverage (`run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage" --logger trx --results-directory ./TestResults`) to `.github/workflows/build.yml` (FR-006, FR-007, initial implementation before codecoverage.runsettings)
 
 **Checkpoint**: User Story 1 fully functional — push to `main` runs restore → build → test and fails correctly on a test failure or build warning.
 
@@ -73,7 +73,7 @@ description: "Task list for GitHub Actions CI Build Workflow"
 - [X] T011 [US2] Add `permissions` block (`contents: read`, `checks: write`, `actions: read`, `pull-requests: write`) to the `build` job in `.github/workflows/build.yml` (required by `dorny/test-reporter@v3.0.0` for Check Run creation on non-fork PRs; `pull-requests: write` required for sticky PR comment; FR-017, FR-021)
 - [X] T012 [US2] Add `Upload Test Results` step (`actions/upload-artifact@v7.0.1`, `name: test-results`, `path: TestResults/`, `if: always()`) to `.github/workflows/build.yml` (FR-015, FR-016)
 - [X] T013 [US2] Add `Publish Test Results` step (`dorny/test-reporter@v3.0.0`, `name: Test Results`, `path: TestResults/**/*.trx`, `reporter: dotnet-trx`, `if: always()`) immediately after T012 in `.github/workflows/build.yml` (FR-017; `fail-on-error: true` default fails workflow if any test failed; `fail-on-empty: true` default fails if no TRX files found; Job Summary written for all PRs including forks)
-- [X] T014 [US2] Add `Generate Coverage Report` step (`danielpalme/ReportGenerator-GitHub-Action@5.5.10`, `reports: '**/coverage.cobertura.xml'`, `targetdir: 'coveragereport'`, `assemblyfilters: '-*.Tests*'`, `verbosity: 'Warning'`, `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'`, `if: always()`) to `.github/workflows/build.yml` (FR-013, FR-015; glob required because XPlat Code Coverage writes to a random GUID subdirectory)
+- [X] T014 [US2] Add `Generate Coverage Report` step (`danielpalme/ReportGenerator-GitHub-Action@5.5.10`, `reports: '**/coverage.cobertura.xml'` (glob for XPlat output), `targetdir: 'coveragereport'`, `assemblyfilters: '-*.Tests*'`, `verbosity: 'Warning'`, `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'`, `if: always()`) to `.github/workflows/build.yml` (FR-013, FR-015; glob required because XPlat Code Coverage writes to a random GUID subdirectory)
 - [X] T015 [US2] Add `Write Coverage to Job Summary` step (`run: cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY`, `if: always()`) immediately after T014 in `.github/workflows/build.yml` (FR-020)
 - [X] T016 [US2] Add `Upload Coverage Report` step (`actions/upload-artifact@v7.0.1`, `name: coverage-report`, `path: coveragereport/`, `retention-days: 14`, `if: always()`) to `.github/workflows/build.yml` (FR-014, FR-015)
 - [X] T017 [US2] Add `Post Coverage Summary PR Comment` step (`marocchino/sticky-pull-request-comment@v3.0.4`, `if: github.event_name == 'pull_request'`, `recreate: true`, `path: coveragereport/SummaryGithub.md`) to `.github/workflows/build.yml` (FR-022)
@@ -96,13 +96,25 @@ description: "Task list for GitHub Actions CI Build Workflow"
 
 ---
 
-## Phase 6: Polish & Cross-Cutting Validation
+## Phase 6: Polish & Cross-Cutting — Add Microsoft Code Coverage with codecoverage.runsettings
+
+**Purpose**: Upgrade from XPlat Code Coverage to Microsoft Code Coverage collector via codecoverage.runsettings, enabling more granular coverage configuration and exclusion patterns (FR-012, FR-013).
+
+- [ ] T019 Create `codecoverage.runsettings` file at repository root with Microsoft Code Coverage configuration: enable code coverage for Release builds, exclude `.specify/`, `specs/`, and `tests/` directories from coverage, and configure output to write `{AssemblyName}.cobertura.xml` (FR-012)
+- [ ] T020 Update `Test` step in `.github/workflows/build.yml` to use `--settings codecoverage.runsettings` instead of `--collect:"XPlat Code Coverage"` (FR-012)
+- [ ] T021 Update `Generate Coverage Report` step `reports` glob from `'**/coverage.cobertura.xml'` to `'**/*.cobertura.xml'` to match Microsoft Code Coverage output pattern (FR-013)
+
+**Checkpoint**: Microsoft Code Coverage setup complete with proper exclusion patterns and runsettings configuration.
+
+---
+
+## Phase 7: Validation (Live GitHub Actions)
 
 **Purpose**: Final syntax validation and acceptance against quickstart.md scenarios before merge.
 
-- [X] T019 [P] Validate `.github/workflows/build.yml` syntax: confirm the file is complete and well-formed; run `actionlint` if available to catch GitHub Actions-specific errors (SC-001)
-- [X] T020 [P] Verify baseline is green: run `dotnet test` from repository root and confirm all existing tests pass with zero failures; a green local run is the prerequisite for SC-003 (FR-007)
-- [ ] T021 Run live GitHub Actions validation — push the feature branch and open a PR to `main`, then confirm: all 12 named steps appear in the Actions run log (SC-007), the `test-results` and `coverage-report` artifacts are downloadable from the run summary (FR-014, FR-016), the PR check status updates on new commits (SC-002), inline test results appear via Check Run (same-repo PR) or Job Summary (fork PR) (FR-017), and a sticky PR comment with coverage summary is posted (FR-022)
+- [X] T022 [P] Validate `.github/workflows/build.yml` syntax: confirm the file is complete and well-formed; run `actionlint` if available to catch GitHub Actions-specific errors (SC-001)
+- [X] T023 [P] Verify baseline is green: run `dotnet test` from repository root and confirm all existing tests pass with zero failures; a green local run is the prerequisite for SC-003 (FR-007)
+- [ ] T024 Run live GitHub Actions validation — push the feature branch and open a PR to `main`, then confirm: all 12 named steps appear in the Actions run log (SC-007), the `test-results` and `coverage-report` artifacts are downloadable from the run summary (FR-014, FR-016), the PR check status updates on new commits (SC-002), inline test results appear via Check Run (same-repo PR) or Job Summary (fork PR) (FR-017), and a sticky PR comment with coverage summary is posted (FR-022). After codecoverage.runsettings is in place, verify that coverage collection uses Microsoft Code Coverage and output files follow the `{AssemblyName}.cobertura.xml` naming pattern.
 
 ---
 
@@ -118,12 +130,98 @@ description: "Task list for GitHub Actions CI Build Workflow"
 ### User Story Dependencies
 
 - **User Story 1 (P1)**: Can start after Foundational — no dependencies on US2 or US3
-- **User Story 2 (P2)**: Can start after US1 — adds PR trigger, permissions, and all post-test reporting steps; US2 steps must come after the US1 `Test` step in the YAML
-- **User Story 3 (P3)**: Can start after Foundational — inserts the cache step between `Setup .NET` and `Restore` (independent of US2 reporting steps)
+- **22 and T023 (Validation phase) are independent read-only operations and can run simultaneously
+- T019-T021 (Polish phase) are dependent on each other (runsettings file must exist before build.yml is updated) and must execute sequentially
+- US3 (T018) is logically independent of US2 (T010–T017) — if multiple developers were editing different sections of the file, they could work in parallel and merge; in a single-developer context, execute sequentially
 
-### Within Each User Story
+---
 
-- Workflow steps must be authored in the order they execute in the job (top-to-bottom YAML)
+## Implementation Strategy
+
+### Completed Work (T001-T023)
+
+1. ✅ Phases 1-5: All three user stories fully functional with XPlat Code Coverage
+   - T001-T005: Workflow skeleton and foundational steps
+   - T006-T009: User Story 1 (push trigger, restore, build, test)
+   - T010-T017: User Story 2 (PR trigger, test artifact upload, inline reporting, coverage artifacts, sticky PR comment)
+   - T018: User Story 3 (NuGet caching)
+   - T022-T023: Validation (syntax check and local test baseline)
+
+2. ⏳ Phase 6: Polish — Microsoft Code Coverage setup (PENDING)
+   - T019: Create codecoverage.runsettings file
+   - T020: Update build.yml test step
+   - T021: Update ReportGenerator glob
+
+3. ⏳ Phase 7: Live GitHub Actions validation (PENDING)
+   - T024: Push + PR validation on `main`
+
+### MVP First (User Story 1 Only)
+
+1. Phases 1-2 complete: skeleton and foundational steps ✅
+2. Phase 3 complete: core push-triggered pipeline ✅
+3. Push to `main` to validate MVP ✅
+4. Proceed to US2 and US3 ✅
+
+### Incremental Delivery
+
+1. Setup + Foundational → skeleton with shared steps ✅
+2. User Story 1 → core push-triggered pipeline ✅
+3. User Story 2 → PR trigger + all reporting steps ✅
+4. User Story 3 → NuGet cache step ✅
+5. Polish → Microsoft Code Coverage setup (IN PROGRESS)
+6. Validation → Live GitHub Actions push/PR test
+
+---
+
+## File Change Summary
+
+| File | Tasks | Change Type |
+|---|---|---|
+| `.github/workflows/build.yml` | T001–T021 | **Existing**: CI workflow, updated to use codecoverage.runsettings |
+| `codecoverage.runsettings` | T019 | **New file**: Microsoft Code Coverage configuration |
+
+**No changes to**: source code, test files, project files, `Directory.Build.props`, or any other existing file (FR-011 hard constraint).
+
+---
+
+## Requirements Coverage
+
+| Requirement | Description | Satisfied by | Status |
+|---|---|---|---|
+| FR-001 | Trigger on push to `main` | T006 | ✅ Done |
+| FR-002 | Trigger on PR to `main` | T010 | ✅ Done |
+| FR-003 | `actions/setup-dotnet@v5.2.0`, .NET `10.0.x` | T004 | ✅ Done |
+| FR-004 | `dotnet restore` as distinct named step | T007 | ✅ Done |
+| FR-005 | `dotnet build --configuration Release --no-restore` | T008 | ✅ Done |
+| FR-006 | `dotnet test --configuration Release --no-build` | T009, T020 | ✅ Done |
+| FR-007 | Fail if any test fails | T009, T023 | ✅ Done |
+| FR-008 | Treat build warnings as errors (`--warnaserror`) | T008 | ✅ Done |
+| FR-009 | Cache NuGet packages; `path: ${{ env.NUGET_PACKAGES }}` | T018 | ✅ Done |
+| FR-010 | File at `.github/workflows/build.yml` | T001, T002 | ✅ Done |
+| FR-011 | No changes to source or test files | All tasks — YAML + runsettings only | ✅ Done |
+| FR-012 | Microsoft Code Coverage via `--settings codecoverage.runsettings` | T019, T020 | ⏳ Pending |
+| FR-013 | `danielpalme/ReportGenerator@5.5.10` with `reports: '**/*.cobertura.xml'` for Microsoft output | T014, T021 | ⏳ Pending |
+| FR-014 | Upload coverage report artifact; `retention-days: 14` | T016 | ✅ Done |
+| FR-015 | Post-test steps with `if: always()`; failures fail workflow | T012, T013, T014, T015, T016 | ✅ Done |
+| FR-016 | Upload TRX test results as artifact | T012 | ✅ Done |
+| FR-017 | `dorny/test-reporter@v3.0.0` inline PR reporting | T011, T013 | ✅ Done |
+| FR-018 | `actions/checkout@v6.0.2` pinned patch version | T003 | ✅ Done |
+| FR-019 | Workflow-level env vars (`DOTNET_SKIP_FIRST_TIME_EXPERIENCE`, `DOTNET_CLI_TELEMETRY_OPTOUT`, `NUGET_PACKAGES`) | T005 | ✅ Done |
+| FR-020 | `Write Coverage to Job Summary` step immediately after Generate Coverage Report | T015 | ✅ Done |
+| FR-021 | `pull-requests: write` permission on job | T011 | ✅ Done |
+| FR-022 | Sticky PR comment via `marocchino/sticky-pull-request-comment@v3.0.4` | T017 | ✅ Done |
+| FR-023 | `coverlet.collector` referenced in test project | Already present at v10.0.1 — no task needed | ✅ Done |
+
+---
+
+## Notes
+
+- `TreatWarningsAsErrors=true` is already active via `Directory.Build.props` — the `Build` step will fail on any warning without any CLI flag (research.md Item 3)
+- The `.slnx` solution format is natively supported by .NET 9+ CLI — `dotnet restore / build / test` auto-discovers it at the repo root
+- XPlat Code Coverage writes `coverage.cobertura.xml` into a random GUID subdirectory under `./TestResults/` — the `**/coverage.cobertura.xml` glob in T014 is correct for XPlat output; T021 will update to `**/*.cobertura.xml` for Microsoft Code Coverage naming (research.md Item 7)
+- `dorny/test-reporter@v3.0.0` requires `permissions: { checks: write, actions: read }` (T011) for Check Run creation on same-repo PRs; fork PRs receive a read-only token from GitHub and fall back to Job Summary — no `continue-on-error` needed (research.md Item 10)
+- `coverlet.collector@10.0.1` is already present in `SpecKitApi.Tests.csproj` — FR-023 satisfied without a code-change task
+- Commit on feature branch `007-github-actions-ci` after each phase checkpoint is verifieduthored in the order they execute in the job (top-to-bottom YAML)
 - US1: push trigger → Restore → Build → Test
 - US2: pull_request trigger + permissions → Upload Test Results → Publish Test Results → Generate Coverage Report → Write Coverage to Job Summary → Upload Coverage Report → Post Coverage Summary PR Comment
 - US3: Cache NuGet packages (inserted between Setup .NET and Restore)
