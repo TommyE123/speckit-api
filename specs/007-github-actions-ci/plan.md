@@ -39,7 +39,7 @@ Add a single GitHub Actions workflow file (`.github/workflows/build.yml`) that p
 - No matrix builds, secrets, deployments, or environment-specific configuration in scope
 - `permissions: { contents: read, checks: write, actions: read, pull-requests: write }` required on the job — `checks: write` for `dorny/test-reporter` Check Run creation on non-fork PRs; `pull-requests: write` for sticky PR comment; fork PRs receive read-only tokens from GitHub's security model and fall back to Job Summary via v3's graceful degradation
 
-**Scale/Scope**: One workflow file, ~100 lines of YAML, one job, thirteen named steps
+**Scale/Scope**: One workflow file, ~100 lines of YAML, one job, twelve named steps
 
 ## Constitution Check
 

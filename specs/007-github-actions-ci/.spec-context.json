@@ -2,7 +2,7 @@
   "workflow": "speckit",
   "selectedAt": "2026-05-24T14:57:42Z",
   "currentStep": "tasks",
-  "status": "tasking",
+  "status": "ready-to-implement",
   "specName": "GitHub Actions CI Build Workflow",
   "branch": "007-github-actions-ci",
   "stepHistory": {
@@ -11,11 +11,11 @@
       "completedAt": "2026-05-25T12:00:56.599Z"
     },
     "plan": {
-      "startedAt": "2026-05-25T15:23:32.330Z",
-      "completedAt": "2026-05-25T15:53:01.743Z"
+      "startedAt": "2026-05-25T17:41:14.884Z",
+      "completedAt": "2026-05-25T17:53:34.115Z"
     },
     "tasks": {
-      "startedAt": "2026-05-25T15:53:01.743Z",
+      "startedAt": "2026-05-25T17:53:34.115Z",
       "completedAt": null
     },
     "implement": {
@@ -743,6 +743,96 @@
       },
       "by": "ai",
       "at": "2026-05-25T15:53:40Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-25T17:41:14.884Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-25T17:42:02Z"
+    },
+    {
+      "step": "plan",
+      "substep": "research",
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-25T17:42:32Z"
+    },
+    {
+      "step": "plan",
+      "substep": "design",
+      "from": {
+        "step": "plan",
+        "substep": "research"
+      },
+      "by": "ai",
+      "at": "2026-05-25T17:43:33Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": "design"
+      },
+      "by": "ai",
+      "at": "2026-05-25T17:43:51Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-05-25T17:53:34.115Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-25T17:53:52Z"
+    },
+    {
+      "step": "tasks",
+      "substep": "generate",
+      "from": {
+        "step": "tasks",
+        "substep": null
+      },
+      "by": "ai",
+      "at": "2026-05-25T17:54:30Z"
+    },
+    {
+      "step": "tasks",
+      "substep": null,
+      "from": {
+        "step": "tasks",
+        "substep": "generate"
+      },
+      "by": "ai",
+      "at": "2026-05-25T17:56:43Z"
     }
   ],
   "task_summaries": {
