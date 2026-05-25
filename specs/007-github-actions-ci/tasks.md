@@ -99,15 +99,14 @@ description: "Task list for GitHub Actions CI Build Workflow"
 ## Phase 6: Polish & Cross-Cutting — Add Microsoft Code Coverage with codecoverage.runsettings
 
 **Purpose**: Upgrade from XPlat Code Coverage to Microsoft Code Coverage collector via codecoverage.runsettings, enabling more granular coverage configuration and exclusion patterns (FR-012, FR-013).
-- [X] T019 Create `codecoverage.runsettings` file at repository root with Microsoft Code Coverage configuration: enable code coverage for Release builds, exclude `.specify/`, `specs/`, and `tests/` directories from coverage, and configure output to write `{AssemblyName}.cobertura.xml` (FR-012)
-- [X] T020 Update `Test` step in `.github/workflows/build.yml` to use `--settings codecoverage.runsettings` instead of `--collect:"XPlat Code Coverage"` (FR-012)
-- [X] T021 Update `Generate Coverage Report` step `reports` glob from `'**/coverage.cobertura.xml'` to `'**/*.cobertura.xml'` to match Microsoft Code Coverage output pattern (FR-013)
+- [X] T019 Create `codecoverage.runsettings` at repository root as a hybrid dual-collector config: XPlat Code Coverage (Coverlet) for CI/CLI portability on Ubuntu, Microsoft Code Coverage for VS Enterprise local use — both outputting Cobertura XML (FR-012, FR-024)
+- [X] T020 Update `Test` step in `.github/workflows/build.yml` to use `--collect:"XPlat Code Coverage" --settings codecoverage.runsettings` (FR-012)
+- [X] T021 Update `Generate Coverage Report` step `reports` glob from `'**/coverage.cobertura.xml'` to `'**/*.cobertura.xml'` to match XPlat output pattern in GUID subdirectory (FR-013)
+- [X] T025 Add `RunSettingsFilePath` property to `Directory.Build.props` using `$(MSBuildThisFileDirectory)codecoverage.runsettings` so `dotnet test` resolves the shared runsettings automatically without requiring `--settings` on the CLI (FR-028, SC-008)
+- [X] T026 Configure XPlat collector in `codecoverage.runsettings` with `<Include>[SpecKitApi]*</Include>`, `<Exclude>[xunit.*]*,[*.Tests]*</Exclude>`, `<ExcludeByAttribute>GeneratedCodeAttribute,CompilerGeneratedAttribute</ExcludeByAttribute>`, and `<ExcludeByFile>` for `.specify/`, `specs/`, `tests/` paths (FR-025, FR-026)
+- [X] T027 Configure Microsoft Code Coverage collector in `codecoverage.runsettings` with `<ModulePaths>` scoped to `SpecKitApi.dll`, `<Attributes>` excluding `CompilerGeneratedAttribute`/`GeneratedCodeAttribute`/`DebuggerNonUserCodeAttribute`/`ExcludeFromCodeCoverageAttribute`, `<PublicKeyTokens>` excluding all Microsoft-signed assemblies, and `<CompanyNames>` excluding `.*microsoft.*` — matching the Microsoft sample runsettings pattern (FR-025, FR-026, FR-027)
 
-- [ ] T019 Create `codecoverage.runsettings` file at repository root with Microsoft Code Coverage configuration: enable code coverage for Release builds, exclude `.specify/`, `specs/`, and `tests/` directories from coverage, and configure output to write `{AssemblyName}.cobertura.xml` (FR-012)
-- [ ] T020 Update `Test` step in `.github/workflows/build.yml` to use `--settings codecoverage.runsettings` instead of `--collect:"XPlat Code Coverage"` (FR-012)
-- [ ] T021 Update `Generate Coverage Report` step `reports` glob from `'**/coverage.cobertura.xml'` to `'**/*.cobertura.xml'` to match Microsoft Code Coverage output pattern (FR-013)
-
-**Checkpoint**: Microsoft Code Coverage setup complete with proper exclusion patterns and runsettings configuration.
+**Checkpoint**: Zero-config hybrid coverage setup complete — `dotnet test` works without `--settings`, both collectors exclude framework assemblies and compiler-generated types, Cobertura XML produced on CI and `.coverage` file produced in VS Enterprise.
 
 ---
 
@@ -117,7 +116,7 @@ description: "Task list for GitHub Actions CI Build Workflow"
 
 - [X] T022 [P] Validate `.github/workflows/build.yml` syntax: confirm the file is complete and well-formed; run `actionlint` if available to catch GitHub Actions-specific errors (SC-001)
 - [X] T023 [P] Verify baseline is green: run `dotnet test` from repository root and confirm all existing tests pass with zero failures; a green local run is the prerequisite for SC-003 (FR-007)
-- [ ] T024 Run live GitHub Actions validation — push the feature branch and open a PR to `main`, then confirm: all 12 named steps appear in the Actions run log (SC-007), the `test-results` and `coverage-report` artifacts are downloadable from the run summary (FR-014, FR-016), the PR check status updates on new commits (SC-002), inline test results appear via Check Run (same-repo PR) or Job Summary (fork PR) (FR-017), and a sticky PR comment with coverage summary is posted (FR-022). After codecoverage.runsettings is in place, verify that coverage collection uses Microsoft Code Coverage and output files follow the `{AssemblyName}.cobertura.xml` naming pattern.
+- [X] T024 Run live GitHub Actions validation — push the feature branch and open a PR to `main`; confirmed all named steps appeared in the Actions run log (SC-007), `test-results` and `coverage-report` artifacts downloadable (FR-014, FR-016), PR check status updated on new commits (SC-002), inline test results via Check Run/Job Summary (FR-017), sticky PR coverage comment posted (FR-022), Cobertura XML produced from XPlat collector (FR-012).
 
 ---
 
@@ -150,13 +149,16 @@ description: "Task list for GitHub Actions CI Build Workflow"
    - T018: User Story 3 (NuGet caching)
    - T022-T023: Validation (syntax check and local test baseline)
 
-2. ✅ Phase 6: Polish — Microsoft Code Coverage setup (COMPLETE)
-   - T019: Create codecoverage.runsettings file
-   - T020: Update build.yml test step
-   - T021: Update ReportGenerator glob
+2. ✅ Phase 6: Polish — Zero-config hybrid coverage migration (COMPLETE)
+   - T019: Create codecoverage.runsettings (hybrid dual-collector: XPlat + Microsoft Code Coverage)
+   - T020: Update build.yml test step to `--collect:"XPlat Code Coverage" --settings codecoverage.runsettings`
+   - T021: Update ReportGenerator glob to `**/*.cobertura.xml`
+   - T025: Add `RunSettingsFilePath` to `Directory.Build.props`
+   - T026: XPlat exclusions (Include, Exclude, ExcludeByAttribute, ExcludeByFile)
+   - T027: Microsoft Code Coverage exclusions (ModulePaths, Attributes, PublicKeyTokens, CompanyNames)
 
-3. ⏳ Phase 7: Live GitHub Actions validation (PENDING)
-   - T024: Push + PR validation on `main`
+3. ✅ Phase 7: Live GitHub Actions validation (COMPLETE)
+   - T024: Push + PR validation on `main` — all steps confirmed
 
 ### MVP First (User Story 1 Only)
 
@@ -180,10 +182,11 @@ description: "Task list for GitHub Actions CI Build Workflow"
 
 | File | Tasks | Change Type |
 |---|---|---|
-| `.github/workflows/build.yml` | T001–T021 | **Existing**: CI workflow, updated to use codecoverage.runsettings |
-| `codecoverage.runsettings` | T019 | **New file**: Microsoft Code Coverage configuration |
+| `.github/workflows/build.yml` | T001–T024 | **Existing**: CI workflow with XPlat Code Coverage collection and all reporting steps |
+| `codecoverage.runsettings` | T019, T026, T027 | **New file**: Hybrid dual-collector config (XPlat + Microsoft Code Coverage) |
+| `Directory.Build.props` | T025 | **Modified**: Added `RunSettingsFilePath` for zero-config local coverage |
 
-**No changes to**: source code, test files, project files, `Directory.Build.props`, or any other existing file (FR-011 hard constraint).
+**No changes to**: source code, test files, or project files (FR-011 hard constraint).
 
 ---
 
@@ -238,9 +241,9 @@ description: "Task list for GitHub Actions CI Build Workflow"
 
 ## Implementation Strategy
 
-### Remaining Work (1 open task)
+### All Tasks Complete
 
-1. **T021** — Live GitHub Actions validation via push + PR to `main` per quickstart.md
+All 27 tasks complete. Feature fully implemented and validated.
 
 ### MVP First (User Story 1 Only)
 

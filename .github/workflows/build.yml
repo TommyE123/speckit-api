@@ -50,7 +50,7 @@ jobs:
           dotnet test \
             --configuration Release \
             --no-build \
-            --collect:"Code Coverage" \
+            --collect:"XPlat Code Coverage" \
             --settings codecoverage.runsettings \
             --logger trx \
             --results-directory ./TestResults

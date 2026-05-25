@@ -2,4 +2,8 @@
   <PropertyGroup>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <RunSettingsFilePath>$(MSBuildThisFileDirectory)codecoverage.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
 </Project>

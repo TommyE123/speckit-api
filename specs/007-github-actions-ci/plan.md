@@ -6,7 +6,7 @@
 
 ## Summary
 
-Add a single GitHub Actions workflow file (`.github/workflows/build.yml`) that provides continuous integration for the SpecKitApi .NET 10 Web API. The workflow triggers on every push and pull request targeting `main`, runs on `ubuntu-latest`, declares workflow-level environment variables (`DOTNET_SKIP_FIRST_TIME_EXPERIENCE`, `DOTNET_CLI_TELEMETRY_OPTOUT`, `NUGET_PACKAGES`) for telemetry opt-out and cache path consistency (FR-019), checks out the repository via `actions/checkout@v6.0.2` (FR-018), installs the .NET 10 SDK via `actions/setup-dotnet@v5.2.0`, caches NuGet packages at `${{ env.NUGET_PACKAGES }}` keyed on a hash of all `*.csproj` files (FR-009), then executes three individually named build steps — restore → build (Release, `--warnaserror`) → test (Release, with XPlat Code Coverage and TRX logging) — followed by six post-test reporting steps: upload TRX test results, publish test results inline on pull requests using `dorny/test-reporter@v3.0.0` (with Job Summary fallback for fork PRs), generate an HTML + Cobertura + Markdown coverage report (with `assemblyfilters: '-*.Tests*'` and `MarkdownSummaryGithub` output), write the coverage summary to the GitHub Actions job summary (FR-020), upload the report as a downloadable artifact with `retention-days: 14` (FR-014), and post a sticky PR comment with the coverage summary on pull request events (FR-022). The `--warnaserror` flag is required by FR-008 and the existing `Directory.Build.props` also enforces warnings-as-errors at the MSBuild level; no source code changes are required or permitted. `coverlet.collector@10.0.1` is already referenced in `SpecKitApi.Tests.csproj` (FR-023 satisfied).
+Add a single GitHub Actions workflow file (`.github/workflows/build.yml`) that provides continuous integration for the SpecKitApi .NET 10 Web API, plus a hybrid `codecoverage.runsettings` file and a `Directory.Build.props` update for zero-config local coverage. The workflow triggers on every push and pull request targeting `main`, runs on `ubuntu-latest`, declares workflow-level environment variables (`DOTNET_SKIP_FIRST_TIME_EXPERIENCE`, `DOTNET_CLI_TELEMETRY_OPTOUT`, `NUGET_PACKAGES`) for telemetry opt-out and cache path consistency (FR-019), checks out the repository via `actions/checkout@v6.0.2` (FR-018), installs the .NET 10 SDK via `actions/setup-dotnet@v5.2.0`, caches NuGet packages at `${{ env.NUGET_PACKAGES }}` keyed on a hash of all `*.csproj` files (FR-009), then executes three individually named build steps — restore → build (Release, `--warnaserror`) → test (Release, with `--collect:"XPlat Code Coverage" --settings codecoverage.runsettings` and TRX logging) — followed by six post-test reporting steps: upload TRX test results, publish test results inline on pull requests using `dorny/test-reporter@v3.0.0` (with Job Summary fallback for fork PRs), generate an HTML + Cobertura + Markdown coverage report (with `assemblyfilters: '-*.Tests*'` and `MarkdownSummaryGithub` output), write the coverage summary to the GitHub Actions job summary (FR-020), upload the report as a downloadable artifact with `retention-days: 14` (FR-014), and post a sticky PR comment with the coverage summary on pull request events (FR-022). The `codecoverage.runsettings` file at repository root implements a hybrid dual-collector configuration: XPlat Code Coverage (Coverlet) for portability on Ubuntu CI, and Microsoft Code Coverage for VS Enterprise local use — both outputting Cobertura XML, both excluding framework assemblies (via `PublicKeyTokens` and `[SpecKitApi]*` include) and compiler-generated types (via `Attributes`/`ExcludeByAttribute`). `Directory.Build.props` injects `RunSettingsFilePath` via `$(MSBuildThisFileDirectory)codecoverage.runsettings` so `dotnet test` resolves the shared config without requiring `--settings` locally. `coverlet.collector@10.0.1` is already referenced in `SpecKitApi.Tests.csproj` (FR-023 satisfied).
 
 ## Technical Context
 
@@ -74,22 +74,20 @@ specs/007-github-actions-ci/
 ```text
 .github/
 └── workflows/
-    └── build.yml        ← NEW: CI workflow (sole deliverable of this feature)
+    └── build.yml        ← NEW: CI workflow
 
-# All existing source files are unchanged:
-src/
-└── SpecKitApi/
-    └── SpecKitApi.csproj
+# Repository root additions:
+codecoverage.runsettings ← NEW: Hybrid dual-collector coverage config (XPlat + Microsoft Code Coverage)
+Directory.Build.props    ← MODIFIED: Added RunSettingsFilePath for zero-config local coverage
 
 tests/
 └── SpecKitApi.Tests/
     └── SpecKitApi.Tests.csproj   ← coverlet.collector@10.0.1 already present (FR-023)
 
 SpecKitApi.slnx
-Directory.Build.props    ← EXISTING: TreatWarningsAsErrors=true (relied upon, not modified)
 ```
 
-**Structure Decision**: Infrastructure-only layout. A single new file is added under `.github/workflows/`. No directories are added to `src/` or `tests/`. No existing file is modified.
+**Structure Decision**: Infrastructure-only layout. One new workflow file, one new runsettings file, and one property added to `Directory.Build.props`. No changes to `src/` or `tests/`.
 
 ## Workflow Design
 

@@ -19,6 +19,27 @@
 - Q: Should inline PR test reporting be mandatory and gating for all PRs (including forks)? → A: Yes; the `dorny/test-reporter` step must run and succeed for every pull request, and workflow execution must fail if reporting cannot be published.
 - Q: What checkout action version should be required? → A: Use `actions/checkout@v6.0.2`.
 - Q: What workflow hardening and reporting enhancements are required? → A: Add workflow-level env vars (`DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true`, `DOTNET_CLI_TELEMETRY_OPTOUT=true`, `NUGET_PACKAGES=${{ github.workspace }}/.nuget/packages`), use `${{ env.NUGET_PACKAGES }}` for cache path, extend ReportGenerator options (`assemblyfilters: '-*.Tests*'`, `verbosity: Warning`, `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'`), add `Write Coverage to Job Summary` step (`if: always()`) after coverage generation, add `pull-requests: write` permission, add sticky PR comment via `marocchino/sticky-pull-request-comment@v3.0.4` on `pull_request` events with `recreate: true` reading `coveragereport/SummaryGithub.md`, and set coverage artifact `retention-days: 14`.
+- Q: How should workflow coverage be collected to maximize CI portability? → A: CI test execution must collect with `--collect:"XPlat Code Coverage"` so Ubuntu-based GitHub Actions runs reliably produce Cobertura input for ReportGenerator.
+- Q: How should universal coverage migration be layered onto the existing CI spec? → A: Add shared coverage wiring as an incremental extension to this feature (single root `codecoverage.runsettings`, `Directory.Build.props` path injection via `$(MSBuildThisFileDirectory)`, and CI tests collecting with XPlat for Ubuntu compatibility).
+- Q: What part of the migration example needs correction? → A: CI coverage collection uses `XPlat Code Coverage`; local Visual Studio Enterprise coverage may still use Microsoft `Code Coverage` semantics.
+
+## Coverage Migration Addendum (Incremental)
+
+This addendum extends the existing CI workflow feature rather than replacing it. The objective is a single repository coverage configuration that works in local Visual Studio Enterprise workflows and Ubuntu GitHub Actions CI without manual IDE setup.
+
+### Addendum Scenarios
+
+1. Visual Studio Enterprise users can run Analyze Code Coverage and get exclusions from the repository runsettings without manually selecting settings files.
+2. CLI users can run `dotnet test --collect:"Code Coverage"` and obtain Cobertura-compatible coverage output governed by repository runsettings defaults.
+3. Pull request CI runs produce Cobertura input for ReportGenerator and publish Markdown coverage summaries consistently.
+
+### Addendum Acceptance Checks
+
+- [ ] A single repository-root `codecoverage.runsettings` governs coverage behavior.
+- [ ] `Directory.Build.props` injects `RunSettingsFilePath` using `$(MSBuildThisFileDirectory)`.
+- [ ] Workflow test execution collects with `--collect:"XPlat Code Coverage"` and honors repository coverage rules.
+- [ ] Coverage output excludes `xunit` and test assemblies consistently.
+- [ ] Coverage summary publishing remains functional in CI (`SummaryGithub.md` generated and consumed).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -90,7 +111,7 @@ After the first workflow run, NuGet packages are cached. Subsequent workflow run
 - **FR-009**: The workflow MUST cache NuGet packages between runs using `actions/cache@v4` with `path: ${{ env.NUGET_PACKAGES }}`.
 - **FR-010**: The workflow file MUST be located at `.github/workflows/build.yml` in the repository.
 - **FR-011**: No source code or business logic changes are permitted as part of this feature.
-- **FR-012**: The workflow MUST collect code coverage during the test run using `--settings codecoverage.runsettings` (activates the Microsoft Code Coverage data collector configured in `codecoverage.runsettings` at the repository root).
+- **FR-012**: The workflow MUST collect code coverage during the test run using `--collect:"XPlat Code Coverage"` in CI so Ubuntu workflow runs generate Cobertura-compatible output for ReportGenerator.
 - **FR-013**: The workflow MUST generate an HTML coverage report using `danielpalme/ReportGenerator-GitHub-Action@5.5.10` with `reports: '**/*.cobertura.xml'`, `targetdir: 'coveragereport'`, `assemblyfilters: '-*.Tests*'`, `verbosity: 'Warning'`, and `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'`; a separate manual `dotnet tool install` step MUST NOT be used for coverage report generation.
 - **FR-014**: The workflow MUST upload the generated coverage report as a build artifact using `actions/upload-artifact@v7.0.1` with `retention-days: 14`.
 - **FR-015**: All post-test steps (including TRX artifact upload, test-result publishing, coverage report generation, coverage summary publication, PR comment publication, and artifact upload) MUST run with `if: always()` where applicable so they execute even when tests fail, and failures in these steps MUST fail the workflow unless explicitly event-gated.
@@ -102,6 +123,11 @@ After the first workflow run, NuGet packages are cached. Subsequent workflow run
 - **FR-021**: The build job permissions MUST include `pull-requests: write` in addition to existing permissions required for checks and actions.
 - **FR-022**: The workflow MUST add a sticky PR comment step using `marocchino/sticky-pull-request-comment@v3.0.4`, limited to `pull_request` events, with `recreate: true`, and comment content read from `coveragereport/SummaryGithub.md`.
 - **FR-023**: The test project MUST reference `coverlet.collector`; if the package reference is missing, it MUST be added without introducing source code or business logic changes.
+- **FR-024**: The repository MUST maintain exactly one canonical coverage settings file at `codecoverage.runsettings` in the repository root.
+- **FR-025**: `Directory.Build.props` MUST define `RunSettingsFilePath` using `$(MSBuildThisFileDirectory)codecoverage.runsettings` to support nested test project paths.
+- **FR-026**: Coverage configuration MUST exclude `xunit` and `*.Tests` assemblies from coverage results.
+- **FR-027**: Coverage configuration MUST exclude source paths under `.specify/`, `specs/`, and `tests/` where source-path filtering is supported by the active collector.
+- **FR-028**: CI coverage reporting MUST continue to consume Cobertura output via ReportGenerator and publish both job-summary and PR-comment outputs.
 
 ## Success Criteria *(mandatory)*
 
@@ -114,6 +140,9 @@ After the first workflow run, NuGet packages are cached. Subsequent workflow run
 - **SC-005**: A codebase with at least one failing test results in a failed workflow run 100% of the time.
 - **SC-006**: Subsequent workflow runs (after an initial cache-warm run) complete the restore step faster due to NuGet package caching.
 - **SC-007**: The restore, build, and test steps are individually named and identifiable in the workflow run log.
+- **SC-008**: Running `dotnet test --collect:"Code Coverage"` at repository root produces coverage output governed by repository runsettings without requiring manual IDE configuration.
+- **SC-009**: CI test commands collect with `--collect:"XPlat Code Coverage"` and still produce Cobertura coverage files consumable by ReportGenerator.
+- **SC-010**: Coverage outputs and summaries exclude test assemblies consistently across local and CI execution paths.
 
 ## Assumptions
 
