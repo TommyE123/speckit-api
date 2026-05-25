@@ -46,7 +46,14 @@ jobs:
         run: dotnet build --configuration Release --no-restore --warnaserror
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --settings codecoverage.runsettings --logger trx --results-directory ./TestResults
+        run: |
+          dotnet test \
+            --configuration Release \
+            --no-build \
+            --collect:"Code Coverage" \
+            --settings codecoverage.runsettings \
+            --logger trx \
+            --results-directory ./TestResults
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v7.0.1
@@ -75,7 +82,7 @@ jobs:
 
       - name: Write Coverage to Job Summary
         if: always()
-        run: cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+        run: cat coveragereport/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v7.0.1
