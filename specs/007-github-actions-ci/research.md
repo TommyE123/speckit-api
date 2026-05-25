@@ -2,7 +2,7 @@
 
 **Feature**: 007-github-actions-ci
 **Phase**: 0 — Research
-**Status**: Complete — all unknowns resolved
+**Status**: Complete — all unknowns resolved (RI-1 through RI-16; covers FR-001 through FR-023)
 
 ---
 
@@ -284,6 +284,177 @@ pattern is no longer required to satisfy FR-017. The single-workflow design is p
 
 ---
 
+## Research Item 11: Workflow-level environment variables (FR-019)
+
+**Decision**: Add a top-level `env:` block to `build.yml` with:
+```yaml
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+```
+
+**Rationale**: `DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true` suppresses the first-run SDK welcome
+banner (saves a few hundred milliseconds). `DOTNET_CLI_TELEMETRY_OPTOUT=true` prevents the SDK
+from sending anonymous usage telemetry to Microsoft during CI runs. `NUGET_PACKAGES` overrides
+the NuGet global packages folder from the runner-default `~/.nuget/packages` to a path anchored
+on `${{ github.workspace }}` — placing the cache within the workspace root simplifies cache key
+design, reduces cross-job path collisions, and is consistent with `actions/cache@v4`'s recommended
+pattern for NuGet on GitHub Actions (used by `path: ${{ env.NUGET_PACKAGES }}`).
+
+**Key finding — cache path alignment**: FR-009 requires `path: ${{ env.NUGET_PACKAGES }}` on the
+cache step. This is only possible when `NUGET_PACKAGES` is declared as an env var. The `env:` block
+must appear at workflow scope (not job scope) so the env var is resolved by `actions/cache` before
+the step runs.
+
+**Alternatives considered**:
+
+- **Job-level env:** — would also work for NuGet cache path; workflow-level env chosen because
+  all three variables (`DOTNET_SKIP_FIRST_TIME_EXPERIENCE`, `DOTNET_CLI_TELEMETRY_OPTOUT`,
+  `NUGET_PACKAGES`) should be visible to every job in the file.
+- **Hardcode `~/.nuget/packages` in cache step** — already used in the previous plan iteration;
+  replaced by `${{ env.NUGET_PACKAGES }}` per FR-009's updated wording.
+
+---
+
+## Research Item 12: pull-requests: write permission (FR-021)
+
+**Decision**: Add `pull-requests: write` to the job-level `permissions:` block alongside the
+existing `contents: read`, `checks: write`, and `actions: read`.
+
+**Rationale**: The `marocchino/sticky-pull-request-comment@2.9.4` action (FR-022) creates or
+updates a comment on a pull request. Creating/editing PR comments requires `pull-requests: write`
+on the `GITHUB_TOKEN`. Without this permission the sticky comment step fails with a 403 error
+on the GitHub API call. Adding the permission to the job-level block is the minimal scope
+required — it does not elevate any other operation in the job.
+
+**Alternatives considered**:
+
+- **Workflow-level permissions:** — broader scope; not appropriate when the permission is only
+  needed for one action in one job. Job-level declaration is more precise.
+- **Using a PAT with PR write access** — introduces secret management; not necessary when
+  `GITHUB_TOKEN` with the correct permission is sufficient.
+
+---
+
+## Research Item 13: Sticky PR comment — marocchino/sticky-pull-request-comment@2.9.4 (FR-022)
+
+**Decision**: Add a step gated on `if: github.event_name == 'pull_request'` using
+`marocchino/sticky-pull-request-comment@2.9.4` with:
+```yaml
+- name: Post Coverage Summary PR Comment
+  uses: marocchino/sticky-pull-request-comment@2.9.4
+  if: github.event_name == 'pull_request'
+  with:
+    recreate: true
+    path: coveragereport/SummaryGithub.md
+```
+
+**Rationale**: FR-022 requires the action be limited to `pull_request` events; using
+`if: github.event_name == 'pull_request'` on the step satisfies this without splitting the
+workflow into two files. `recreate: true` ensures each run overwrites the previous comment
+rather than appending a new one (the comment count stays at 1 per PR regardless of how many
+runs fire). The `path:` input reads the markdown file written by ReportGenerator when
+`reporttypes` includes `MarkdownSummaryGithub` (see Research Item 14).
+
+**Key finding — no `if: always()` needed**: This step should only run when coverage was
+successfully generated. Not applying `if: always()` means the step is skipped when earlier
+steps (e.g., Generate Coverage Report) fail — which is the correct behaviour; there is no
+`SummaryGithub.md` to post in that case.
+
+**Key finding — permissions dependency**: Requires `pull-requests: write` (Research Item 12).
+Without this, the GitHub API call to create/update the PR comment returns 403.
+
+**Alternatives considered**:
+
+- **`if: always()` + existence check** — adds complexity; the action itself gracefully handles
+  a missing `path` file by doing nothing, but explicit `if: always()` is not needed per spec.
+- **`thollander/actions-comment-pull-request`** — a similar action but not pinned to a version
+  in the spec. FR-022 explicitly names `marocchino/sticky-pull-request-comment@2.9.4`.
+
+---
+
+## Research Item 14: Updated ReportGenerator options (FR-013 revised)
+
+**Decision**: Update `danielpalme/ReportGenerator-GitHub-Action@5.5.10` inputs to:
+```yaml
+assemblyfilters: '-*.Tests*'
+verbosity: 'Warning'
+reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'
+```
+
+**Rationale**:
+- `assemblyfilters: '-*.Tests*'` — excludes test assemblies from the coverage report, so the
+  percentage reflects only production code coverage. The `-` prefix is the ReportGenerator
+  convention for exclusion.
+- `verbosity: 'Warning'` — suppresses verbose ReportGenerator log output in the CI log.
+  Default (`Info`) produces hundreds of lines; `Warning` keeps the log readable.
+- `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'` — adds `MarkdownSummaryGithub`
+  to the previous `HtmlInline;Cobertura` pair. This output type writes
+  `coveragereport/SummaryGithub.md` — a GitHub-flavoured Markdown table summarising coverage
+  per assembly. This file is consumed by:
+    - The `Write Coverage to Job Summary` step (FR-020): appended to `$GITHUB_STEP_SUMMARY`.
+    - The `Post Coverage Summary PR Comment` step (FR-022): posted as a sticky PR comment.
+
+**Alternatives considered**:
+
+- **Keeping `HtmlInline;Cobertura` only** — satisfies FR-013's previous wording but breaks
+  FR-020 and FR-022 which require `SummaryGithub.md`. The updated spec explicitly requires all
+  three report types.
+
+---
+
+## Research Item 15: Write Coverage to Job Summary step (FR-020)
+
+**Decision**: Add the following step immediately after `Generate Coverage Report`:
+```yaml
+- name: Write Coverage to Job Summary
+  if: always()
+  run: cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
+```
+
+**Rationale**: FR-020 requires this step to be placed immediately after the Generate Coverage
+Report step. Appending to `$GITHUB_STEP_SUMMARY` causes the content to appear in the workflow
+run's summary page on GitHub. The `if: always()` ensures the step runs even when tests fail
+(FR-015 alignment). If `SummaryGithub.md` does not exist (e.g., coverage generation failed),
+`cat` will exit non-zero and fail the step — consistent with FR-015's "failures in these steps
+MUST fail the workflow" requirement.
+
+**Key finding — $GITHUB_STEP_SUMMARY availability**: `$GITHUB_STEP_SUMMARY` is a path to a
+runner-managed file injected into every step's environment by the GitHub Actions runner. Writing
+to it via shell redirect is the canonical approach; no action wrapper is needed.
+
+**Alternatives considered**:
+
+- **`echo "$(cat coveragereport/SummaryGithub.md)" >> $GITHUB_STEP_SUMMARY`** — equivalent but
+  more verbose. The direct `cat >> $GITHUB_STEP_SUMMARY` form is the idiomatic one-liner shown
+  in the spec clarification.
+
+---
+
+## Research Item 16: coverlet.collector presence check (FR-023)
+
+**Decision**: FR-023 is already satisfied. `SpecKitApi.Tests.csproj` includes:
+```xml
+<PackageReference Include="coverlet.collector" Version="10.0.1">
+  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+  <PrivateAssets>all</PrivateAssets>
+</PackageReference>
+```
+
+**Rationale**: The XPlat Code Coverage collector (`--collect:"XPlat Code Coverage"`) requires
+`coverlet.collector` to be referenced in the test project. Version `10.0.1` is present;
+no action is needed. FR-023's "MUST be added without introducing source code or business logic
+changes" clause is satisfied by the existing reference — nothing new needs to be added.
+
+**Alternatives considered**:
+
+- **Adding the reference during the workflow run** — not possible via workflow YAML without
+  modifying the `.csproj` file, which is prohibited by FR-011. Confirmed already present, so
+  not needed.
+
+---
+
 ## Resolved Unknowns Summary
 
 | Unknown | Resolution |
@@ -298,8 +469,16 @@ pattern is no longer required to satisfy FR-017. The single-workflow design is p
 | Coverage collection (FR-012) | ✅ `--collect:"XPlat Code Coverage" --logger trx --results-directory ./TestResults`; `coverlet.collector` already referenced in test project |
 | Coverage XML path pattern (FR-013) | ✅ XPlat Code Coverage outputs to `TestResults/<guid>/coverage.cobertura.xml`; use glob `**/coverage.cobertura.xml` |
 | ReportGenerator version (FR-013) | ✅ `danielpalme/ReportGenerator-GitHub-Action@5.5.10`; action self-installs the tool |
-| Coverage artifact upload (FR-014) | ✅ `actions/upload-artifact@v7.0.1` with `name: coverage-report`, `path: coveragereport/` |
-| `if: always()` on post-test steps (FR-015) | ✅ Apply to Upload TRX, Publish Test Results, Generate Coverage Report, and Upload Coverage Report steps |
+| Coverage artifact upload (FR-014) | ✅ `actions/upload-artifact@v7.0.1` with `name: coverage-report`, `path: coveragereport/`, `retention-days: 14` |
+| `if: always()` on post-test steps (FR-015) | ✅ Apply to Upload TRX, Publish Test Results, Generate Coverage Report, Write Coverage to Job Summary, and Upload Coverage Report steps |
 | Inline PR test reporting (FR-017) | ✅ `dorny/test-reporter@v3.0.0` with `reporter: dotnet-trx`, `path: TestResults/**/*.trx`; placed after Upload Test Results |
 | fork PR support for dorny/test-reporter | ✅ v3 `use-actions-summary: true` default writes Job Summary (no `checks: write` needed); Check Run additionally created for non-fork PRs |
-| Job permissions | ✅ `permissions: { checks: write, actions: read }` required; ensures non-fork PRs get Check Run; fork PRs fall back to Job Summary via v3 graceful degradation |
+| Job permissions | ✅ `permissions: { contents: read, checks: write, actions: read, pull-requests: write }` required; ensures non-fork PRs get Check Run; fork PRs fall back to Job Summary via v3 graceful degradation; `pull-requests: write` needed for sticky PR comment |
+| Workflow-level env vars (FR-019) | ✅ `DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true`, `DOTNET_CLI_TELEMETRY_OPTOUT=true`, `NUGET_PACKAGES=${{ github.workspace }}/.nuget/packages` declared at workflow scope |
+| Cache path updated for env var (FR-009) | ✅ `path: ${{ env.NUGET_PACKAGES }}` uses the declared env var; no hardcoded path |
+| ReportGenerator extended options (FR-013 revised) | ✅ `assemblyfilters: '-*.Tests*'`, `verbosity: 'Warning'`, `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'` |
+| Coverage artifact retention (FR-014) | ✅ `retention-days: 14` on `Upload Coverage Report` step |
+| Write Coverage to Job Summary (FR-020) | ✅ `cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY` immediately after Generate Coverage Report, `if: always()` |
+| `pull-requests: write` permission (FR-021) | ✅ Added to job-level `permissions:` block |
+| Sticky PR comment (FR-022) | ✅ `marocchino/sticky-pull-request-comment@2.9.4` with `recreate: true`, gated on `github.event_name == 'pull_request'` |
+| `coverlet.collector` presence (FR-023) | ✅ Already present in `SpecKitApi.Tests.csproj` at version `10.0.1`; no changes needed |

@@ -18,6 +18,7 @@
 - Q: Should test results also be published inline on pull requests? → A: Yes; add `dorny/test-reporter@v3.0.0` with `reporter: dotnet-trx` and `path: TestResults/**/*.trx`, running with `if: always()` immediately after test-results artifact upload.
 - Q: Should inline PR test reporting be mandatory and gating for all PRs (including forks)? → A: Yes; the `dorny/test-reporter` step must run and succeed for every pull request, and workflow execution must fail if reporting cannot be published.
 - Q: What checkout action version should be required? → A: Use `actions/checkout@v6.0.2`.
+- Q: What workflow hardening and reporting enhancements are required? → A: Add workflow-level env vars (`DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true`, `DOTNET_CLI_TELEMETRY_OPTOUT=true`, `NUGET_PACKAGES=${{ github.workspace }}/.nuget/packages`), use `${{ env.NUGET_PACKAGES }}` for cache path, extend ReportGenerator options (`assemblyfilters: '-*.Tests*'`, `verbosity: Warning`, `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'`), add `Write Coverage to Job Summary` step (`if: always()`) after coverage generation, add `pull-requests: write` permission, add sticky PR comment via `marocchino/sticky-pull-request-comment@2.9.4` on `pull_request` events with `recreate: true` reading `coveragereport/SummaryGithub.md`, and set coverage artifact `retention-days: 14`.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -86,16 +87,21 @@ After the first workflow run, NuGet packages are cached. Subsequent workflow run
 - **FR-006**: The workflow MUST execute `dotnet test` in Release configuration as a distinct, named step.
 - **FR-007**: The workflow MUST fail if any test fails during the test step.
 - **FR-008**: The workflow MUST treat build warnings as errors by running the build step with `--warnaserror`, causing the build step to fail if any warnings are produced.
-- **FR-009**: The workflow MUST cache NuGet packages between runs to reduce restore time by using the cache functionality provided by `actions/setup-dotnet@v5.2.0`.
+- **FR-009**: The workflow MUST cache NuGet packages between runs using `actions/cache@v4` with `path: ${{ env.NUGET_PACKAGES }}`.
 - **FR-010**: The workflow file MUST be located at `.github/workflows/build.yml` in the repository.
-- **FR-011**: No changes to source code or test files are permitted as part of this feature.
+- **FR-011**: No source code or business logic changes are permitted as part of this feature.
 - **FR-012**: The workflow MUST collect code coverage during the test run using `--collect:"XPlat Code Coverage"`.
-- **FR-013**: The workflow MUST generate an HTML coverage report using `danielpalme/ReportGenerator-GitHub-Action@5.5.10` with `reports: '**/coverage.cobertura.xml'`, `targetdir: 'coveragereport'`, and `reporttypes: 'HtmlInline;Cobertura'`; a separate manual `dotnet tool install` step MUST NOT be used for coverage report generation.
-- **FR-014**: The workflow MUST upload the generated coverage report as a build artifact using `actions/upload-artifact@v7.0.1`.
-- **FR-015**: All post-test steps (including TRX artifact upload, coverage report generation, and artifact upload) MUST run with `if: always()` so they execute even when tests fail, and failures in these steps MUST fail the workflow.
+- **FR-013**: The workflow MUST generate an HTML coverage report using `danielpalme/ReportGenerator-GitHub-Action@5.5.10` with `reports: '**/coverage.cobertura.xml'`, `targetdir: 'coveragereport'`, `assemblyfilters: '-*.Tests*'`, `verbosity: 'Warning'`, and `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'`; a separate manual `dotnet tool install` step MUST NOT be used for coverage report generation.
+- **FR-014**: The workflow MUST upload the generated coverage report as a build artifact using `actions/upload-artifact@v7.0.1` with `retention-days: 14`.
+- **FR-015**: All post-test steps (including TRX artifact upload, test-result publishing, coverage report generation, coverage summary publication, PR comment publication, and artifact upload) MUST run with `if: always()` where applicable so they execute even when tests fail, and failures in these steps MUST fail the workflow unless explicitly event-gated.
 - **FR-016**: The workflow MUST upload TRX test result files as a build artifact to preserve test diagnostics when tests fail.
 - **FR-017**: The workflow MUST publish test results inline on pull requests using `dorny/test-reporter@v3.0.0` with `reporter: dotnet-trx` and `path: TestResults/**/*.trx`; this step MUST run with `if: always()`, be placed immediately after the test results artifact upload step, run for all pull requests (including fork-originated pull requests), and fail the workflow if publication is unsuccessful.
 - **FR-018**: The workflow MUST use `actions/checkout@v6.0.2` for the repository checkout step.
+- **FR-019**: The workflow MUST define workflow-level environment variables: `DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true`, `DOTNET_CLI_TELEMETRY_OPTOUT=true`, and `NUGET_PACKAGES=${{ github.workspace }}/.nuget/packages`.
+- **FR-020**: The workflow MUST include a `Write Coverage to Job Summary` step immediately after `Generate Coverage Report` with `if: always()` and command `cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY`.
+- **FR-021**: The build job permissions MUST include `pull-requests: write` in addition to existing permissions required for checks and actions.
+- **FR-022**: The workflow MUST add a sticky PR comment step using `marocchino/sticky-pull-request-comment@2.9.4`, limited to `pull_request` events, with `recreate: true`, and comment content read from `coveragereport/SummaryGithub.md`.
+- **FR-023**: The test project MUST reference `coverlet.collector`; if the package reference is missing, it MUST be added without introducing source code or business logic changes.
 
 ## Success Criteria *(mandatory)*
 

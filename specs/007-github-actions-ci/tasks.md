@@ -144,10 +144,9 @@ Task T017: "Run dotnet test — verify baseline green"
 
 ## Implementation Strategy
 
-### Remaining Work (2 open tasks)
+### Remaining Work (1 open task)
 
-1. **T003** — Fix checkout version bug: change `actions/checkout@v4` → `actions/checkout@v6.0.2` in `.github/workflows/build.yml`
-2. **T018** — Live GitHub Actions validation via push + PR to `main` per quickstart.md
+1. **T018** — Live GitHub Actions validation via push + PR to `main` per quickstart.md
 
 ### MVP First (User Story 1 Only)
 
@@ -198,13 +197,19 @@ Task T017: "Run dotnet test — verify baseline green"
 | FR-015 | Post-test steps with `if: always()`; failures fail workflow | T011, T012, T013, T014 | ✅ Done |
 | FR-016 | Upload TRX test results as artifact | T011 | ✅ Done |
 | FR-017 | `dorny/test-reporter@v3.0.0` inline PR reporting | T010, T012 | ✅ Done |
-| FR-018 | `actions/checkout@v6.0.2` pinned patch version | T003 | ⚠️ **OPEN** — fix required |
+| FR-018 | `actions/checkout@v6.0.2` pinned patch version | T003 | ✅ Done |
+| FR-019 | Workflow-level env vars (DOTNET_*, NUGET_PACKAGES) | build.yml env block | ✅ Done |
+| FR-020 | Write Coverage to Job Summary step | build.yml step | ✅ Done |
+| FR-021 | `pull-requests: write` permission | job permissions block | ✅ Done |
+| FR-022 | Sticky PR comment via `marocchino/sticky-pull-request-comment@2.9.4` | build.yml step | ✅ Done |
+| FR-023 | `coverlet.collector` referenced in test project | Already present at v10.0.1 | ✅ Done |
 
 ---
 
 ## Notes
 
-- **FR-018 BUG**: `.github/workflows/build.yml` currently uses `actions/checkout@v4`; T003 must update this to `actions/checkout@v6.0.2` before merge
+- **FR-018 RESOLVED**: `.github/workflows/build.yml` uses `actions/checkout@v6.0.2` (correct pinned version)
+- **FR-019 through FR-023**: All implemented — workflow-level env vars, Write Coverage to Job Summary, pull-requests: write permission, sticky PR comment, coverlet.collector already present
 - FR-011 is an absolute constraint: do NOT modify any existing source, test, project, or build file
 - `TreatWarningsAsErrors=true` is already active via `Directory.Build.props` — the `Build` step will fail on any warning without any CLI flag (research.md Item 3)
 - The `.slnx` solution format is natively supported by .NET 9+ CLI — `dotnet restore / build / test` auto-discovers it at the repo root
