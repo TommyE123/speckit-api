@@ -99,6 +99,9 @@ description: "Task list for GitHub Actions CI Build Workflow"
 ## Phase 6: Polish & Cross-Cutting — Add Microsoft Code Coverage with codecoverage.runsettings
 
 **Purpose**: Upgrade from XPlat Code Coverage to Microsoft Code Coverage collector via codecoverage.runsettings, enabling more granular coverage configuration and exclusion patterns (FR-012, FR-013).
+- [X] T019 Create `codecoverage.runsettings` file at repository root with Microsoft Code Coverage configuration: enable code coverage for Release builds, exclude `.specify/`, `specs/`, and `tests/` directories from coverage, and configure output to write `{AssemblyName}.cobertura.xml` (FR-012)
+- [X] T020 Update `Test` step in `.github/workflows/build.yml` to use `--settings codecoverage.runsettings` instead of `--collect:"XPlat Code Coverage"` (FR-012)
+- [X] T021 Update `Generate Coverage Report` step `reports` glob from `'**/coverage.cobertura.xml'` to `'**/*.cobertura.xml'` to match Microsoft Code Coverage output pattern (FR-013)
 
 - [ ] T019 Create `codecoverage.runsettings` file at repository root with Microsoft Code Coverage configuration: enable code coverage for Release builds, exclude `.specify/`, `specs/`, and `tests/` directories from coverage, and configure output to write `{AssemblyName}.cobertura.xml` (FR-012)
 - [ ] T020 Update `Test` step in `.github/workflows/build.yml` to use `--settings codecoverage.runsettings` instead of `--collect:"XPlat Code Coverage"` (FR-012)
@@ -147,7 +150,7 @@ description: "Task list for GitHub Actions CI Build Workflow"
    - T018: User Story 3 (NuGet caching)
    - T022-T023: Validation (syntax check and local test baseline)
 
-2. ⏳ Phase 6: Polish — Microsoft Code Coverage setup (PENDING)
+2. ✅ Phase 6: Polish — Microsoft Code Coverage setup (COMPLETE)
    - T019: Create codecoverage.runsettings file
    - T020: Update build.yml test step
    - T021: Update ReportGenerator glob
@@ -199,8 +202,8 @@ description: "Task list for GitHub Actions CI Build Workflow"
 | FR-009 | Cache NuGet packages; `path: ${{ env.NUGET_PACKAGES }}` | T018 | ✅ Done |
 | FR-010 | File at `.github/workflows/build.yml` | T001, T002 | ✅ Done |
 | FR-011 | No changes to source or test files | All tasks — YAML + runsettings only | ✅ Done |
-| FR-012 | Microsoft Code Coverage via `--settings codecoverage.runsettings` | T019, T020 | ⏳ Pending |
-| FR-013 | `danielpalme/ReportGenerator@5.5.10` with `reports: '**/*.cobertura.xml'` for Microsoft output | T014, T021 | ⏳ Pending |
+| FR-012 | Microsoft Code Coverage via `--settings codecoverage.runsettings` | T019, T020 | ✅ Done |
+| FR-013 | `danielpalme/ReportGenerator@5.5.10` with `reports: '**/*.cobertura.xml'` for Microsoft output | T014, T021 | ✅ Done |
 | FR-014 | Upload coverage report artifact; `retention-days: 14` | T016 | ✅ Done |
 | FR-015 | Post-test steps with `if: always()`; failures fail workflow | T012, T013, T014, T015, T016 | ✅ Done |
 | FR-016 | Upload TRX test results as artifact | T012 | ✅ Done |

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <!-- Results directory for test results and coverage output -->
+  <RunConfiguration>
+    <ResultsDirectory>./TestResults</ResultsDirectory>
+  </RunConfiguration>
+
+  <!-- Microsoft Code Coverage configuration (FR-012, FR-013) -->
+  <CodeCoverage>
+    <!-- Enable code coverage collection -->
+    <Enabled>true</Enabled>
+
+    <!-- Output format: Cobertura XML for compatibility with ReportGenerator (FR-013) -->
+    <Format>Cobertura</Format>
+
+    <!-- Use source link for better coverage attribution -->
+    <UseSourceLink>true</UseSourceLink>
+
+    <!-- Exclusions: Exclude specification, infrastructure, and test projects from coverage analysis (FR-012) -->
+    <Exclude>
+      <!-- Exclude specification and infrastructure directories -->
+      <Pattern>.specify/**</Pattern>
+      <Pattern>specs/**</Pattern>
+
+      <!-- Exclude test assemblies and directories -->
+      <Pattern>**/tests/**</Pattern>
+      <Pattern>**.Tests/**</Pattern>
+      <Pattern>**.Tests.dll</Pattern>
+    </Exclude>
+
+    <!-- Include only the main API assembly for coverage -->
+    <Include>
+      <Pattern>SpecKitApi/**</Pattern>
+    </Include>
+  </CodeCoverage>
+</RunSettings>

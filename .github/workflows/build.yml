@@ -46,7 +46,7 @@ jobs:
         run: dotnet build --configuration Release --no-restore --warnaserror
 
       - name: Test
-        run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage" --logger trx --results-directory ./TestResults
+        run: dotnet test --configuration Release --no-build --settings codecoverage.runsettings --logger trx --results-directory ./TestResults
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v7.0.1
@@ -67,7 +67,7 @@ jobs:
         uses: danielpalme/ReportGenerator-GitHub-Action@5.5.10
         if: always()
         with:
-          reports: "**/coverage.cobertura.xml"
+          reports: "**/*.cobertura.xml"
           targetdir: "coveragereport"
           assemblyfilters: "-*.Tests*"
           verbosity: "Warning"
