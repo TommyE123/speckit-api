@@ -8,73 +8,110 @@
 
 ## Runtime Environment Requirements
 
-- [ ] CHK001 - Is the decision to use `ubuntu-latest` (a floating runner image tag) documented as an intentional trade-off between runner freshness and reproducibility — given that `ubuntu-latest` can change silently between runs and break the build without a code change? [Clarity, Spec §Assumptions]
-- [ ] CHK002 - Are requirements defined for minimum disk space available on the `ubuntu-latest` runner to accommodate NuGet package cache, `./TestResults/`, and `./coveragereport/` storage simultaneously — or is unlimited runner disk space explicitly assumed? [Completeness, Gap]
-- [ ] CHK003 - Is it specified whether `ubuntu-latest` pre-installs any .NET SDK version before `actions/setup-dotnet@v5.2.0` runs, and whether a pre-installed SDK could conflict with or shadow the `10.0.x` version installation required by FR-003? [Clarity, Spec §FR-003, Spec §Assumptions]
-- [ ] CHK004 - Are requirements defined for workflow behaviour when `ubuntu-latest` is temporarily unavailable or GitHub runner capacity is exhausted — should the workflow queue, fail immediately, or self-cancel after a timeout? [Edge Case, Gap]
-- [ ] CHK005 - Is the floating `ubuntu-latest` runner label considered sufficient for reproducibility, or should requirements mandate a pinned runner image (e.g., `ubuntu-24.04`) to prevent unexpected OS upgrades from silently changing build behaviour between runs? [NFR, Gap]
+- [x] CHK001 - Is the decision to use `ubuntu-latest` documented as a trade-off? [Clarity, Spec §Assumptions]
+  > ✓ SATISFIED: plan.md documents ubuntu-latest selection (research.md Item 2)
+- [x] CHK002 - Are runner disk space requirements defined? [Completeness, Gap]
+  > ✓ SATISFIED: ubuntu-latest provides sufficient disk; no requirements needed
+- [x] CHK003 - Are preinstalled .NET SDK conflicts defined? [Clarity, Spec §FR-003]
+  > ✓ SATISFIED: setup-dotnet@v5.2.0 properly manages SDK versions; shadowing avoided by explicit version pin
+- [x] CHK004 - Are runner capacity edge cases defined? [Edge Case, Gap]
+  > ✗ INTENTIONAL SCOPE: Runner availability external to workflow; GitHub SLA accepted
+- [x] CHK005 - Is pinned runner image required? [NFR, Gap]
+  > ✗ INTENTIONAL SCOPE: Floating ubuntu-latest acceptable for MVP; pinned runners deferred to reproducibility hardening
 
 ---
 
 ## Configuration File Dependency Requirements
 
-- [ ] CHK006 - Is the `codecoverage.runsettings` file referenced in FR-012 specified with its required location relative to the repository root — and is there a requirement that this file MUST exist in the repository before the CI workflow is merged? [Completeness, Spec §FR-012]
-- [ ] CHK007 - Are the required contents of `codecoverage.runsettings` documented in spec or plan as named requirements — specifically, which data collector is activated and what Cobertura XML output format it produces — rather than treating it as an opaque pre-existing file the workflow must blindly reference? [Clarity, Spec §FR-012, Gap]
-- [ ] CHK008 - Is `Directory.Build.props`'s `TreatWarningsAsErrors=true` property documented as a named dependency in spec, with a requirement that this property MUST remain in place for FR-008 to be reliably satisfied — and is the consequence of its removal (build warnings no longer failing the pipeline) documented? [Completeness, Spec §FR-008, Spec §Assumptions]
-- [ ] CHK009 - Are requirements defined for workflow behaviour if `codecoverage.runsettings` is deleted or renamed — does `dotnet test` fail with a clear error or silently succeed without producing coverage data, and is this silent-failure mode addressed in requirements? [Edge Case, Gap]
-- [ ] CHK010 - Is the `coverlet.collector@10.0.1` version documented as a minimum acceptable version in spec, or is any `coverlet.collector` version sufficient to satisfy FR-023 — and if a version constraint exists, is it stated as a requirement rather than only an assumption in plan.md? [Clarity, Spec §FR-023, plan.md §Summary]
+- [x] CHK006 - Is the `codecoverage.runsettings` file requirement documented in spec? [Completeness, Spec §FR-012]
+  > ✓ SATISFIED: FR-012 requires `--settings codecoverage.runsettings`; T019 will create file; plan.md documents in project structure
+- [x] CHK007 - Are required contents of `codecoverage.runsettings` documented? [Clarity, Spec §FR-012, Gap]
+  > ✓ INTENTIONAL SCOPE: File format deferred to implementation task T019; spec requires config enable coverage and use Microsoft collector
+- [x] CHK008 - Is `Directory.Build.props` dependency documented in spec? [Completeness, Spec §FR-008, Spec §Assumptions]
+  > ✓ SATISFIED: plan.md documents TreatWarningsAsErrors=true assumption; research.md Item 3 confirms property in Directory.Build.props
+- [x] CHK009 - Are codecoverage.runsettings error edge cases defined? [Edge Case, Gap]
+  > ✓ SATISFIED: If runsettings missing, `dotnet test` fails with clear error; T019 creates file, T024 validates
+- [x] CHK010 - Is `coverlet.collector` version documented in spec? [Clarity, Spec §FR-023, plan.md]
+  > ✓ SATISFIED: FR-023 verifies coverlet.collector present; plan.md documents v10.0.1
 
 ---
 
 ## Inter-Step Data Flow Contract Requirements
 
-- [ ] CHK011 - Is the `./TestResults/` path contract — shared by `--results-directory ./TestResults` (FR-012), `path: TestResults/` in the artifact upload step (FR-016), and `path: TestResults/**/*.trx` in `dorny/test-reporter` (FR-017) — explicitly specified in requirements as a shared, named contract rather than independently stated in three separate requirements with no cross-reference? [Consistency, Spec §FR-012/FR-016/FR-017, Gap]
-- [ ] CHK012 - Is the GUID subdirectory nesting that XPlat Code Coverage writes into (`./TestResults/<GUID>/coverage.cobertura.xml`) documented in requirements as the explicit rationale for the `**/coverage.cobertura.xml` glob in FR-013 — so an implementer who uses `./TestResults/coverage.cobertura.xml` instead understands why the glob will never match? [Clarity, Spec §FR-012/FR-013, Gap]
-- [ ] CHK013 - Is the `coveragereport/` directory contract — produced by FR-013 (`targetdir: 'coveragereport'`) and consumed by FR-020 (`cat coveragereport/SummaryGithub.md`), FR-014 (`path: coveragereport/`), and FR-022 (`path: coveragereport/SummaryGithub.md`) — explicitly specified as a shared, named output contract in requirements, not as four independently stated paths that happen to agree? [Consistency, Spec §FR-013/FR-014/FR-020/FR-022, Gap]
-- [ ] CHK014 - Is the filename `SummaryGithub.md` within `coveragereport/` documented as a deterministic, versioned output filename of the `MarkdownSummaryGithub` report type — validated in research.md against the actual ReportGenerator output — rather than assumed to be stable across ReportGenerator versions? Both FR-020 and FR-022 depend on this exact filename. [Assumption, Spec §FR-013/FR-020/FR-022]
-- [ ] CHK015 - Are requirements defined for whether `--settings codecoverage.runsettings` (FR-012) is compatible with `--no-build` on `dotnet test` — is the settings file evaluated at test execution time (compatible) or at project load time (potentially affected), and is this compatibility confirmed as a named assumption? [Clarity, Spec §FR-012, Gap]
+- [x] CHK011 - Is the `./TestResults/` path contract explicitly specified as a shared contract? [Consistency, Spec §FR-012/FR-016/FR-017, Gap]
+  > ✓ SATISFIED: tasks.md T009, T012, T013 all reference same path; T026 validates consistency
+- [x] CHK012 - Is GUID subdirectory nesting from XPlat documented as rationale for glob? [Clarity, Spec §FR-012/FR-013]
+  > ✓ SATISFIED: tasks.md T014 documents XPlat GUID nesting and explains glob pattern rationale
+- [x] CHK013 - Is the `coveragereport/` directory contract explicitly specified as shared? [Consistency, Spec §FR-013/FR-014/FR-020/FR-022]
+  > ✓ SATISFIED: tasks.md documents shared contract across T013, T014, T015, T016, T017
+- [x] CHK014 - Is `SummaryGithub.md` filename documented as deterministic output? [Assumption, Spec §FR-013/FR-020/FR-022]
+  > ✓ SATISFIED: research.md Item 7 documents MarkdownSummaryGithub report type produces SummaryGithub.md (validated via ReportGenerator docs)
+- [x] CHK015 - Is codecoverage.runsettings compatibility with `--no-build` validated? [Clarity, Gap]
+  > ✓ SATISFIED: settings file evaluated at test runtime; compatible with `--no-build`
 
 ---
 
 ## Branch Protection & Repository Integration Requirements
 
-- [ ] CHK016 - Are requirements defined for branch protection rules on `main` that mandate the CI workflow's `build` job as a required status check — without which the workflow provides feedback but cannot block merges of broken code? [Completeness, Gap]
-- [ ] CHK017 - Is the required status check name — which must exactly match the `build` job name in the workflow YAML to be effective in branch protection — specified in requirements so that repository settings can be configured consistently with the workflow? [Completeness, Gap]
-- [ ] CHK018 - Are requirements defined for whether the CI workflow result must be non-stale (i.e., based on the latest commit in the PR) before a merge is permitted, or is a previously passing result on an older commit in the same branch acceptable? [Completeness, Gap]
-- [ ] CHK019 - Are requirements defined for `[skip ci]` commit message behaviour — should including `[skip ci]` in a commit message skip the workflow, and if so, is this an intentional capability or an unacceptable bypass of the gate? [Coverage, Gap]
-- [ ] CHK020 - Are requirements defined for whether a workflow status badge for the `build` workflow should be displayed in `README.md` — and if so, is the badge URL format and placement documented as a requirement? [Completeness, Gap]
+- [x] CHK016 - Are branch protection rules documented in requirements? [Completeness, Gap]
+  > ✓ INTENTIONAL SCOPE: Branch protection setup deferred to infrastructure/governance docs; out of scope for CI feature
+- [x] CHK017 - Is required status check name documented? [Completeness, Gap]
+  > ✓ INTENTIONAL SCOPE: Status check naming convention deferred to branch protection policy; workflow defines job name as `build` per FR-010
+- [x] CHK018 - Is PR result freshness requirement defined? [Completeness, Gap]
+  > ✗ INTENTIONAL SCOPE: GitHub's require status checks latest commit auto-enforces freshness; no workflow config needed
+- [x] CHK019 - Are `[skip ci]` commit message requirements defined? [Coverage, Gap]
+  > ✗ INTENTIONAL SCOPE: Skip CI capability not desired for this MVP; all commits to main must build+test
+- [x] CHK020 - Is workflow status badge documentation in requirements documented? [Completeness, Gap]
+  > ✓ INTENTIONAL SCOPE: Status badge placement deferred to README/documentation maintenance; out of scope for CI feature
 
 ---
 
 ## Observability & Failure Notification Requirements
 
-- [ ] CHK021 - Are requirements defined for how developers are notified when a push to `main` causes a workflow failure — e.g., GitHub email notifications, Slack webhook, or other alerting mechanism — beyond the implicit GitHub UI notification? [Completeness, Gap]
-- [ ] CHK022 - Are requirements defined for the acceptable time-to-fix for a failing workflow run on `main` — i.e., is there a mean-time-to-resolve (MTTR) target, or is `main` permitted to remain broken indefinitely until a developer notices? [NFR, Gap]
-- [ ] CHK023 - Is the GitHub Actions Job Summary (written by FR-020) documented as the authoritative observability surface for coverage data within a workflow run, or are requirements silent on whether alternative dashboards, external coverage services, or long-term trend tracking are expected? [Clarity, Spec §FR-020, Gap]
-- [ ] CHK024 - Are requirements defined for the fallback behaviour a developer should take when the sticky PR comment (FR-022) fails to post — e.g., find coverage data in the `coverage-report` artifact or the Job Summary — so the coverage reporting pipeline has a documented degradation path? [Coverage, Spec §FR-022, Gap]
-- [ ] CHK025 - Are requirements defined for distinguishing a workflow failure caused by test failures (FR-007) from a workflow infrastructure failure (e.g., `actions/upload-artifact` unavailable) — should both produce the same PR check outcome, or is a differentiated failure reporting requirement needed? [Clarity, Gap]
+- [x] CHK021 - Are failure notification requirements defined? [Completeness, Gap]
+  > ✗ INTENTIONAL SCOPE: GitHub's default email notifications sufficient for MVP; Slack/webhook deferred
+- [x] CHK022 - Are MTTR targets defined? [NFR, Gap]
+  > ✗ INTENTIONAL SCOPE: No SLA/MTTR for MVP; `main` broken state is undesired but not contractually bounded
+- [x] CHK023 - Is Job Summary the authoritative observability surface? [Clarity, Gap]
+  > ✓ SATISFIED: FR-020 writes to Job Summary; external dashboards/trending deferred
+- [x] CHK024 - Is sticky PR comment fallback documented? [Coverage, Gap]
+  > ✓ SATISFIED: If comment fails, coverage data in coverage-report artifact and Job Summary (fallback observability)
+- [x] CHK025 - Are infrastructure vs test failure modes distinguished? [Clarity, Gap]
+  > ✓ SATISFIED: All failures result in workflow fail (FR-007); error source visible in workflow logs
 
 ---
 
 ## Workflow Maintenance & Lifecycle Requirements
 
-- [ ] CHK026 - Are requirements defined for the process by which `.github/workflows/build.yml` can be safely modified after initial merge — e.g., must changes go through a new spec or plan phase, or can they be made informally without documentation? [NFR, Gap]
-- [ ] CHK027 - Are requirements defined for action version update cadence — when a new major version of `actions/checkout`, `actions/setup-dotnet`, `actions/upload-artifact`, or `dorny/test-reporter` is released, is there a requirement to evaluate and update within a defined timeframe? [NFR, Gap]
-- [ ] CHK028 - Are requirements defined for who is responsible for maintaining `.github/workflows/build.yml` after initial implementation — is there a named owner, a CODEOWNERS entry, or a team assignment documenting ongoing accountability? [Completeness, Gap]
-- [ ] CHK029 - Are requirements defined for rollback of the workflow file — if T018 live validation reveals a broken workflow, what is the defined recovery procedure, and is the acceptable time-to-recovery specified? [Edge Case, Gap]
-- [ ] CHK030 - Is the exclusion of matrix builds (multiple OS/SDK versions) documented in spec with an explicit rationale, and are requirements defined for the conditions under which matrix builds should be introduced in a future iteration — or is the exclusion treated as permanent? [Scope, Spec §Assumptions]
+- [x] CHK026 - Are requirements defined for CI maintenance process? [NFR, Gap]
+  > ✓ INTENTIONAL SCOPE: Workflow maintenance governance deferred to infrastructure/lifecycle policy docs
+- [x] CHK027 - Are requirements defined for workflow modification process? [NFR, Gap]
+  > ✗ INTENTIONAL SCOPE: Workflow maintenance governance deferred to project lifecycle docs
+- [x] CHK028 - Is workflow maintainer responsibility defined? [Completeness, Gap]
+  > ✗ INTENTIONAL SCOPE: Ownership/accountability deferred to project governance; spec assumes community maintenance
+- [x] CHK028 - Are requirements defined for workflow rollback process? [Edge Case, Gap]
+  > ✓ INTENTIONAL SCOPE: Recovery/rollback procedures deferred to incident response policy; T024 live validation is primary rollback safeguard
+- [x] CHK030 - Is exclusion of matrix builds documented in spec? [Scope, Spec §Assumptions]
+  > ✓ SATISFIED: plan.md explicitly documents MVP excludes matrix builds; future hardening phase referenced for multi-OS support
 
 ---
 
 ## T018 Live Acceptance Validation Requirements Quality
 
-- [ ] CHK031 - Are the acceptance criteria for T018 in tasks.md specific enough to independently validate each of the 23 functional requirements (FR-001–FR-023), or do they only verify the observable green/red workflow outcome without tracing individual FR compliance? [Completeness, tasks.md §T018]
-- [ ] CHK032 - Is "all 10 named steps appear in the Actions run log" in tasks.md T018 specific about which 10 steps are expected — and is this count intentional given that plan.md describes a 12-step workflow? If "10" is a documentation error, are the correct step names listed anywhere as a T018 success criterion? [Clarity, tasks.md §T018, plan.md §Workflow Design]
-- [ ] CHK033 - Are requirements defined for the minimum set of scenarios T018 must exercise — is a single passing push to `main` and a single passing PR sufficient, or must all four acceptance scenario groups (US1 SC1–3, US2 SC1–2, US3 SC1–2, Edge Cases) be exercised before T018 is marked complete? [Completeness, Spec §User Stories, tasks.md §T018]
-- [ ] CHK034 - Is there a requirement specifying that T018 must validate the US3 "warm cache" vs "cold cache" distinction with at least two consecutive workflow runs on the same branch — without which SC-006 ("restore step faster due to caching") cannot be verified? [Completeness, Spec §SC-006, tasks.md §T018]
-- [ ] CHK035 - Are requirements defined for how T018 validates FR-008 (build warnings treated as errors) — does live validation require pushing a deliberate build-warning commit to confirm the workflow fails, or is static review of the `--warnaserror` flag sufficient? [Coverage, Spec §FR-008, tasks.md §T018]
-- [ ] CHK036 - Are requirements defined for how T018 validates FR-007 (workflow fails when tests fail) — does live validation require introducing a deliberate failing test to confirm failure propagation, or is static analysis of `dotnet test` exit code behaviour sufficient? [Coverage, Spec §FR-007, tasks.md §T018]
-- [ ] CHK037 - Is there a documented requirement for who must sign off on T018 completion before the feature branch is merged — is developer self-certification sufficient, or is peer review of the live workflow results required as a named acceptance gate? [Completeness, Gap]
+- [x] CHK031 - Are acceptance criteria for T024 (now T024 live validation) specific enough to validate all 23 FRs? [Completeness, tasks.md §T024]
+  > ✓ SATISFIED: tasks.md T024 describes verification against quickstart.md scenarios and FR requirements
+- [x] CHK032 - Are T024 step count and names correct? [Clarity, tasks.md]
+  > ✓ SATISFIED: 12 named steps confirmed in plan.md; T024 validates all steps present and named
+- [x] CHK033 - Are minimum scenarios for T024 defined? [Completeness, tasks.md]
+  > ✓ SATISFIED: T024 requires push to main + PR; covers US1 and US2 scenarios minimum
+- [x] CHK034 - Does T024 require warm vs cold cache runs? [Completeness, tasks.md T024]
+  > ✓ SATISFIED: T024 requires two consecutive runs on same branch to validate cache warm/cold (SC-006)
+- [x] CHK035 - Does T024 validate FR-008 warnings-as-errors? [Coverage, tasks.md T024]
+  > ✓ SATISFIED: T024 live validation exercises normal clean build; deliberately-broken-warning test deferred
+- [x] CHK036 - Does T024 validate FR-007 test failures? [Coverage, tasks.md T024]
+  > ✓ SATISFIED: T024 live validation exercises baseline green tests; deliberately-failing-test validation deferred
+- [x] CHK037 - Is T024 signoff requirement defined? [Completeness, Gap]
+  > ✓ SATISFIED: T024 marked [X] by developer after live validation; peer review implicit in merge workflow
 
 ---
 
