@@ -201,7 +201,7 @@ Task T017: "Run dotnet test — verify baseline green"
 | FR-019 | Workflow-level env vars (DOTNET_*, NUGET_PACKAGES) | build.yml env block | ✅ Done |
 | FR-020 | Write Coverage to Job Summary step | build.yml step | ✅ Done |
 | FR-021 | `pull-requests: write` permission | job permissions block | ✅ Done |
-| FR-022 | Sticky PR comment via `marocchino/sticky-pull-request-comment@2.9.4` | build.yml step | ✅ Done |
+| FR-022 | Sticky PR comment via `marocchino/sticky-pull-request-comment@v3.0.4` | build.yml step | ✅ Done |
 | FR-023 | `coverlet.collector` referenced in test project | Already present at v10.0.1 | ✅ Done |
 
 ---

@@ -19,7 +19,7 @@ Add a single GitHub Actions workflow file (`.github/workflows/build.yml`) that p
 - `actions/upload-artifact@v7.0.1` — upload TRX test results and generated coverage report as build artifacts (FR-014, FR-016)
 - `danielpalme/ReportGenerator-GitHub-Action@5.5.10` — generate HTML + Cobertura + MarkdownSummaryGithub coverage report from `coverage.cobertura.xml` (FR-013)
 - `dorny/test-reporter@v3.0.0` — publish test results inline on PRs via Check Run (non-fork) or GitHub Actions Job Summary (fork PR fallback) (FR-017)
-- `marocchino/sticky-pull-request-comment@2.9.4` — post sticky PR comment with coverage summary (FR-022)
+- `marocchino/sticky-pull-request-comment@v3.0.4` — post sticky PR comment with coverage summary (FR-022)
 
 **Storage**: GitHub Actions Cache (ephemeral NuGet package store at `${{ github.workspace }}/.nuget/packages`; keyed on `*.csproj` file hash); GitHub Actions Artifacts (downloadable coverage report, `retention-days: 14`)
 
@@ -115,7 +115,7 @@ The workflow reflects all requirements from spec.md (including the 2026-05-25 cl
    - **Generate Coverage Report** — `danielpalme/ReportGenerator-GitHub-Action@5.5.10` with `assemblyfilters: '-*.Tests*'`, `verbosity: 'Warning'`, `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'` — produces `coveragereport/SummaryGithub.md` consumed by next two steps (FR-013).
    - **Write Coverage to Job Summary** — `cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY`; placed immediately after Generate Coverage Report (FR-020).
    - **Upload Coverage Report** — `actions/upload-artifact@v7.0.1` with `retention-days: 14` (FR-014).
-   - **Post Coverage Summary PR Comment** — `marocchino/sticky-pull-request-comment@2.9.4`, gated on `github.event_name == 'pull_request'` (not `if: always()`), `recreate: true`, reads `coveragereport/SummaryGithub.md` (FR-022).
+   - **Post Coverage Summary PR Comment** — `marocchino/sticky-pull-request-comment@v3.0.4`, gated on `github.event_name == 'pull_request'` (not `if: always()`), `recreate: true`, reads `coveragereport/SummaryGithub.md` (FR-022).
 
 ### Final Workflow YAML
 
@@ -208,7 +208,7 @@ jobs:
           retention-days: 14
 
       - name: Post Coverage Summary PR Comment
-        uses: marocchino/sticky-pull-request-comment@2.9.4
+        uses: marocchino/sticky-pull-request-comment@v3.0.4
         if: github.event_name == 'pull_request'
         with:
           recreate: true
@@ -240,7 +240,7 @@ jobs:
 | FR-019 | Workflow-level env vars (DOTNET_*, NUGET_PACKAGES) | `env:` block at workflow scope | ✅ |
 | FR-020 | Write Coverage to Job Summary after Generate Coverage Report | Write Coverage to Job Summary step | ✅ |
 | FR-021 | `pull-requests: write` permission | Job `permissions:` block | ✅ |
-| FR-022 | Sticky PR comment via `marocchino/sticky-pull-request-comment@2.9.4` | Post Coverage Summary PR Comment step | ✅ |
+| FR-022 | Sticky PR comment via `marocchino/sticky-pull-request-comment@v3.0.4` | Post Coverage Summary PR Comment step | ✅ |
 | FR-023 | `coverlet.collector` referenced in test project | Already present at v10.0.1 | ✅ |
 
 ## Complexity Tracking

@@ -191,7 +191,7 @@ jobs:
           retention-days: 14
 
       - name: Post Coverage Summary PR Comment
-        uses: marocchino/sticky-pull-request-comment@2.9.4
+        uses: marocchino/sticky-pull-request-comment@v3.0.4
         if: github.event_name == 'pull_request'
         with:
           recreate: true
@@ -213,7 +213,7 @@ jobs:
 > so the Check Run cannot be created; `dorny/test-reporter` v3 falls back to writing a GitHub
 > Actions Job Summary.
 >
-> **Note on sticky PR comment**: `marocchino/sticky-pull-request-comment@2.9.4` requires
+> **Note on sticky PR comment**: `marocchino/sticky-pull-request-comment@v3.0.4` requires
 > `pull-requests: write` in the job `permissions:` block. The step is gated with
 > `if: github.event_name == 'pull_request'` so it skips on push events. `recreate: true` ensures
 > the comment is replaced (not duplicated) on each run. The file `coveragereport/SummaryGithub.md`

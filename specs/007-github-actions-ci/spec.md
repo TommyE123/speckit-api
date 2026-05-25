@@ -18,7 +18,7 @@
 - Q: Should test results also be published inline on pull requests? → A: Yes; add `dorny/test-reporter@v3.0.0` with `reporter: dotnet-trx` and `path: TestResults/**/*.trx`, running with `if: always()` immediately after test-results artifact upload.
 - Q: Should inline PR test reporting be mandatory and gating for all PRs (including forks)? → A: Yes; the `dorny/test-reporter` step must run and succeed for every pull request, and workflow execution must fail if reporting cannot be published.
 - Q: What checkout action version should be required? → A: Use `actions/checkout@v6.0.2`.
-- Q: What workflow hardening and reporting enhancements are required? → A: Add workflow-level env vars (`DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true`, `DOTNET_CLI_TELEMETRY_OPTOUT=true`, `NUGET_PACKAGES=${{ github.workspace }}/.nuget/packages`), use `${{ env.NUGET_PACKAGES }}` for cache path, extend ReportGenerator options (`assemblyfilters: '-*.Tests*'`, `verbosity: Warning`, `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'`), add `Write Coverage to Job Summary` step (`if: always()`) after coverage generation, add `pull-requests: write` permission, add sticky PR comment via `marocchino/sticky-pull-request-comment@2.9.4` on `pull_request` events with `recreate: true` reading `coveragereport/SummaryGithub.md`, and set coverage artifact `retention-days: 14`.
+- Q: What workflow hardening and reporting enhancements are required? → A: Add workflow-level env vars (`DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true`, `DOTNET_CLI_TELEMETRY_OPTOUT=true`, `NUGET_PACKAGES=${{ github.workspace }}/.nuget/packages`), use `${{ env.NUGET_PACKAGES }}` for cache path, extend ReportGenerator options (`assemblyfilters: '-*.Tests*'`, `verbosity: Warning`, `reporttypes: 'HtmlInline;Cobertura;MarkdownSummaryGithub'`), add `Write Coverage to Job Summary` step (`if: always()`) after coverage generation, add `pull-requests: write` permission, add sticky PR comment via `marocchino/sticky-pull-request-comment@v3.0.4` on `pull_request` events with `recreate: true` reading `coveragereport/SummaryGithub.md`, and set coverage artifact `retention-days: 14`.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -100,7 +100,7 @@ After the first workflow run, NuGet packages are cached. Subsequent workflow run
 - **FR-019**: The workflow MUST define workflow-level environment variables: `DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true`, `DOTNET_CLI_TELEMETRY_OPTOUT=true`, and `NUGET_PACKAGES=${{ github.workspace }}/.nuget/packages`.
 - **FR-020**: The workflow MUST include a `Write Coverage to Job Summary` step immediately after `Generate Coverage Report` with `if: always()` and command `cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY`.
 - **FR-021**: The build job permissions MUST include `pull-requests: write` in addition to existing permissions required for checks and actions.
-- **FR-022**: The workflow MUST add a sticky PR comment step using `marocchino/sticky-pull-request-comment@2.9.4`, limited to `pull_request` events, with `recreate: true`, and comment content read from `coveragereport/SummaryGithub.md`.
+- **FR-022**: The workflow MUST add a sticky PR comment step using `marocchino/sticky-pull-request-comment@v3.0.4`, limited to `pull_request` events, with `recreate: true`, and comment content read from `coveragereport/SummaryGithub.md`.
 - **FR-023**: The test project MUST reference `coverlet.collector`; if the package reference is missing, it MUST be added without introducing source code or business logic changes.
 
 ## Success Criteria *(mandatory)*

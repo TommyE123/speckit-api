@@ -322,7 +322,7 @@ the step runs.
 **Decision**: Add `pull-requests: write` to the job-level `permissions:` block alongside the
 existing `contents: read`, `checks: write`, and `actions: read`.
 
-**Rationale**: The `marocchino/sticky-pull-request-comment@2.9.4` action (FR-022) creates or
+**Rationale**: The `marocchino/sticky-pull-request-comment@v3.0.4` action (FR-022) creates or
 updates a comment on a pull request. Creating/editing PR comments requires `pull-requests: write`
 on the `GITHUB_TOKEN`. Without this permission the sticky comment step fails with a 403 error
 on the GitHub API call. Adding the permission to the job-level block is the minimal scope
@@ -337,13 +337,13 @@ required — it does not elevate any other operation in the job.
 
 ---
 
-## Research Item 13: Sticky PR comment — marocchino/sticky-pull-request-comment@2.9.4 (FR-022)
+## Research Item 13: Sticky PR comment — marocchino/sticky-pull-request-comment@v3.0.4 (FR-022)
 
 **Decision**: Add a step gated on `if: github.event_name == 'pull_request'` using
-`marocchino/sticky-pull-request-comment@2.9.4` with:
+`marocchino/sticky-pull-request-comment@v3.0.4` with:
 ```yaml
 - name: Post Coverage Summary PR Comment
-  uses: marocchino/sticky-pull-request-comment@2.9.4
+  uses: marocchino/sticky-pull-request-comment@v3.0.4
   if: github.event_name == 'pull_request'
   with:
     recreate: true
@@ -370,7 +370,7 @@ Without this, the GitHub API call to create/update the PR comment returns 403.
 - **`if: always()` + existence check** — adds complexity; the action itself gracefully handles
   a missing `path` file by doing nothing, but explicit `if: always()` is not needed per spec.
 - **`thollander/actions-comment-pull-request`** — a similar action but not pinned to a version
-  in the spec. FR-022 explicitly names `marocchino/sticky-pull-request-comment@2.9.4`.
+  in the spec. FR-022 explicitly names `marocchino/sticky-pull-request-comment@v3.0.4`.
 
 ---
 
@@ -480,5 +480,5 @@ changes" clause is satisfied by the existing reference — nothing new needs to 
 | Coverage artifact retention (FR-014) | ✅ `retention-days: 14` on `Upload Coverage Report` step |
 | Write Coverage to Job Summary (FR-020) | ✅ `cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY` immediately after Generate Coverage Report, `if: always()` |
 | `pull-requests: write` permission (FR-021) | ✅ Added to job-level `permissions:` block |
-| Sticky PR comment (FR-022) | ✅ `marocchino/sticky-pull-request-comment@2.9.4` with `recreate: true`, gated on `github.event_name == 'pull_request'` |
+| Sticky PR comment (FR-022) | ✅ `marocchino/sticky-pull-request-comment@v3.0.4` with `recreate: true`, gated on `github.event_name == 'pull_request'` |
 | `coverlet.collector` presence (FR-023) | ✅ Already present in `SpecKitApi.Tests.csproj` at version `10.0.1`; no changes needed |
