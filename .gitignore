@@ -259,6 +259,14 @@ _pkginfo.txt
 # but keep track of directories ending in .cache
 !?*.[Cc]ache/
 
+# Cross-platform system/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+
+# Environment files
+.env*
+
 # Others
 ClientBin/
 ~$*
