@@ -55,6 +55,7 @@ bld/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
+.idea/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
@@ -258,6 +259,14 @@ _pkginfo.txt
 *.[Cc]ache
 # but keep track of directories ending in .cache
 !?*.[Cc]ache/
+
+# Cross-platform system/editor noise
+.DS_Store
+Thumbs.db
+*.swp
+
+# Environment files
+.env*
 
 # Others
 ClientBin/

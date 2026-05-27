@@ -1,0 +1,100 @@
+# .github/workflows/build.yml
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      checks: write
+      actions: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5.2.0
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore --warnaserror
+
+      - name: Test
+        run: |
+          dotnet test \
+            --configuration Release \
+            --no-build \
+            --collect:"XPlat Code Coverage" \
+            --settings codecoverage.runsettings \
+            --logger trx \
+            --results-directory ./TestResults
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v7.0.1
+        if: always()
+        with:
+          name: test-results
+          path: TestResults/
+
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v3.0.0
+        if: always()
+        with:
+          name: Test Results
+          path: TestResults/**/*.trx
+          reporter: dotnet-trx
+
+      - name: Generate Coverage Report
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.10
+        if: always()
+        with:
+          reports: "**/*.cobertura.xml"
+          targetdir: "coveragereport"
+          assemblyfilters: "-*.Tests*"
+          verbosity: "Warning"
+          reporttypes: "HtmlInline;Cobertura;MarkdownSummaryGithub"
+
+      - name: Write Coverage to Job Summary
+        if: always()
+        run: cat coveragereport/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v7.0.1
+        if: always()
+        with:
+          name: coverage-report
+          path: coveragereport/
+          retention-days: 14
+
+      - name: Post Coverage Summary PR Comment
+        uses: marocchino/sticky-pull-request-comment@v3.0.4
+        if: github.event_name == 'pull_request'
+        with:
+          recreate: true
+          path: coveragereport/SummaryGithub.md
